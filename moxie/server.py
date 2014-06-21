@@ -1,16 +1,26 @@
 #!/usr/bin/env python3
 import re
 import jinja2
+import os.path
+import mimetypes
+
 import asyncio
 import aiohttp
 import aiohttp.server
 
-_jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader('templates'))
+_jinja_env = jinja2.Environment(
+    loader=jinja2.FileSystemLoader('templates')
+)
 
 
 class MoxieApp(object):
+    _mimetypes = mimetypes.MimeTypes()
+
     def __init__(self):
         self.routes = []
+        self.register('^static/(?P<path>.*)$')(self._do_static)
+        self._static_root = "static"
+        self._static_path = os.path.abspath(self._static_root)
 
     def register(self, path):
         def _(fn):
@@ -18,6 +28,34 @@ class MoxieApp(object):
             self.routes.append((path, func))
             return func
         return _
+
+    def _error_500(self, request, reason):
+        return request.render('500.html', {
+            "reason": reason
+        }, code=500)
+
+
+    def _do_static(self, request, path):
+        rpath = os.path.abspath(os.path.join(self._static_root, path))
+
+        if not rpath.startswith(self._static_path):
+            return self._error_500(request, "bad path.")
+        else:
+            try:
+                type_, encoding = self._mimetypes.guess_type(path)
+                response = request.make_response(200, ('Content-Type', type_))
+
+                with open(rpath, 'rb') as fd:
+                    chunk = fd.read(2048)
+                    while chunk:
+                        response.write(chunk)
+                        chunk = fd.read(2048)
+
+                response.write_eof()
+                return response
+            except IOError as e:
+                return self._error_500(request, "File I/O Error")  # str(e))
+
 
     def __call__(self, *args, **kwargs):
         ret = MoxieHandler(*args, **kwargs)
