@@ -6,19 +6,7 @@ app = MoxieApp()
 @app.register("^hello/$")
 @app.register("^hello/(?P<foo>.*)/$")
 def test(request, foo=None):
-    response = request.make_response(
-        200,
-        ('Content-type', 'text/html')
-    )
-    response.write(b"Hello, ")
-    if foo:
-        response.write(bytes(foo, 'ascii'))
-        response.write(b"\n")
-    else:
-        response.write(b"someone\n")
-
-    response.write_eof()
-    return response
+    return request.render('hello.html', {})
 
 
 loop = asyncio.get_event_loop()

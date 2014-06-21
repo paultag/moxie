@@ -1,0 +1,11 @@
+<h1>Something went wrong!</h1>
+
+Oh no! We can't figure out where you want to go. Sorry about that!</br/>
+
+We tried the following paths:
+<ul>
+    {% for route in routes %}
+    <li>{{route[0]}}</li>
+    {% endfor %}
+</ul>
+

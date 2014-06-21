@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 import re
+import jinja2
 import asyncio
 import aiohttp
 import aiohttp.server
+
+_jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader('templates'))
 
 
 class MoxieApp(object):
@@ -27,6 +30,7 @@ class MoxieRequest(object):
 
 
 class MoxieHandler(aiohttp.server.ServerHttpProtocol):
+    ENCODING = 'utf-8'
 
     def make_response(self, code, *headers):
         response = aiohttp.Response(self.writer, code)
@@ -36,21 +40,18 @@ class MoxieHandler(aiohttp.server.ServerHttpProtocol):
         response.send_headers()
         return response
 
+    def render(self, template, context, *headers, code=200):
+        template = _jinja_env.get_template(template)
+        response = self.make_response(code, *headers)
+        response.write(bytes(template.render(**context), self.ENCODING))
+        response.write_eof()
+        return response
+
     @asyncio.coroutine
     def no_route(self, request):
-        response = self.make_response(
-            404,
-            ('Content-type', 'text/html')
-        )
-        response.write(b"Resolution for " + bytes(request.path, 'ascii') + b" failed.\n\n")
-        response.write(b"Tried routes:\n\n")
-        for route in self._app.routes:
-            response.write(
-                b"  - " +
-                route[0].encode('ascii') +
-                b"\n"
-            )
-        response.write_eof()
+        return request.render('404.html', {
+            "routes": self._app.routes,
+        }, code=404)
 
     @asyncio.coroutine
     def handle_request(self, message, payload):
@@ -77,6 +78,7 @@ class MoxieHandler(aiohttp.server.ServerHttpProtocol):
         request.message = message
         request.payload = payload
         request.make_response = self.make_response
+        request.render = self.render
 
         kwargs = match.groupdict() if match else {}
         ret = yield from func(request, **kwargs)
