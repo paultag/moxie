@@ -4,9 +4,11 @@ from sqlalchemy import select, join
 from moxie.server import MoxieApp
 from moxie.models import Job, Maintainer
 from moxie.core import DATABASE_URL
+from aiodocker.docker import Docker
 
 
 app = MoxieApp()
+docker = Docker()
 
 
 @app.register("^/$")
@@ -69,3 +71,33 @@ def jobs(request, name):
 
         job = yield from jobs.first()
         return request.render('job.html', {"job": job})
+
+
+@app.register("^container/(?P<name>.*)/$")
+def container(request, name):
+    engine = yield from aiopg.sa.create_engine(DATABASE_URL)
+    with (yield from engine) as conn:
+        jobs = yield from conn.execute(select([Job.__table__]).where(
+            Job.name == name
+        ))
+        job = yield from jobs.first()
+        if job is None:
+            return request.render('500.html', {
+                "reason": "No such job"
+            }, code=404)
+
+        try:
+            container = yield from docker.containers.get(name)
+        except ValueError:
+            # No such Container.
+            return request.render('500.html', {
+                "reason": "No such container"
+            }, code=404)
+
+        info = yield from container.show()
+
+        return request.render('container.html', {
+            "job": job,
+            "container": container,
+            "info": info,
+        })
