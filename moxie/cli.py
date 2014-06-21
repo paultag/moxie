@@ -17,6 +17,7 @@ def serve():
 def init():
     from sqlalchemy import create_engine
     from moxie.models import Base
-    engine = create_engine('postgresql://moxie:moxie@localhost:5432/moxie')
+    from moxie.core import DATABASE_URL
+    engine = create_engine(DATABASE_URL)
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
