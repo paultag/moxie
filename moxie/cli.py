@@ -1,5 +1,3 @@
-
-
 def serve():
     import asyncio
     from moxie.app import app
@@ -20,4 +18,5 @@ def init():
     from sqlalchemy import create_engine
     from moxie.models import Base
     engine = create_engine('postgresql://moxie:moxie@localhost:5432/moxie')
+    Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)

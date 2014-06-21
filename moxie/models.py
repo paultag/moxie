@@ -9,3 +9,6 @@ Base = declarative_base(metadata=metadata)
 class Job(Base):
     __tablename__ = 'job'
     id = Column(String(255), primary_key=True)
+    description = Column(String(255))
+    # maintainer
+    # old runs
