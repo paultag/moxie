@@ -1,3 +1,4 @@
 aiopg
 aiohttp
 aiodocker
+sqlalchemy
