@@ -115,6 +115,7 @@ class MoxieHandler(aiohttp.server.ServerHttpProtocol):
         print("[{method}] - {path}".format(path=path, method=method))
 
         request = MoxieRequest()
+        request.handler = self
         request.path = path
         request.method = method
         request.message = message
