@@ -3,6 +3,7 @@ from moxie.server import MoxieApp
 
 app = MoxieApp()
 
+@app.register("^hello/$")
 @app.register("^hello/(?P<foo>.*)/$")
 def test(request, foo=None):
     response = request.make_response(
@@ -10,8 +11,12 @@ def test(request, foo=None):
         ('Content-type', 'text/html')
     )
     response.write(b"Hello, ")
-    response.write(bytes(foo, 'ascii'))
-    response.write(b"\n")
+    if foo:
+        response.write(bytes(foo, 'ascii'))
+        response.write(b"\n")
+    else:
+        response.write(b"someone\n")
+
     response.write_eof()
     return response
 
