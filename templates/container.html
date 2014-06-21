@@ -4,6 +4,12 @@
 
 <h2>Container {{job.name}}</h2>
 
+<a href="/job/{{job.name}}/">{{job.name}}</a>
+
+<br />
+<br />
+<br />
+
 {% set config = info.Config %}
 {% set host_config = info.HostConfig %}
 {% set state = info.State %}
