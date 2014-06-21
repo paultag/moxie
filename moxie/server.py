@@ -110,6 +110,8 @@ class MoxieHandler(aiohttp.server.ServerHttpProtocol):
             func = self.no_route
             match = None
 
+        print("[{method}] - {path}".format(path=path, method=method))
+
         request = MoxieRequest()
         request.path = path
         request.method = method
