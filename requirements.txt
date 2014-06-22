@@ -2,3 +2,4 @@ aiopg
 aiohttp
 aiodocker
 sqlalchemy
+# pyyaml if you want to moxie-load
