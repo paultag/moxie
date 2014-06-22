@@ -14,7 +14,7 @@
               <tbody>
 {% for job in jobs %}
                 <tr>
-                  <td><a href="/job/{{job.id}}" >{{job.id}}</a></td>
+                  <td><a href="/job/{{job.id}}/" >{{job.id}}</a></td>
                   <td>{{job.description}}</td>
                 </tr>
 {% endfor %}
@@ -22,6 +22,4 @@
             </table>
           </div>
         </div>
-      </div>
-    </div>
 {% endblock %}

@@ -22,11 +22,7 @@ def jobs(request):
 def jobs(request, id):
     engine = yield from aiopg.sa.create_engine(DATABASE_URL)
     with (yield from engine) as conn:
-        jobs = yield from conn.execute(
-            select([Job.__table__], use_labels=True)
-            .where(Job.id == id).limit(1)
-        )
+        jobs = yield from conn.execute(select([Job.__table__]).where(
+            Job.id == id).limit(1))
         job = yield from jobs.first()
-        return request.render('job.html', {
-            "job": job
-        })
+        return request.render('job.html', {"job": job})
