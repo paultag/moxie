@@ -1,8 +1,8 @@
 import aiopg.sa
 import asyncio
-from sqlalchemy import select
+from sqlalchemy import select, join
 from moxie.server import MoxieApp
-from moxie.models import Job
+from moxie.models import Job, Maintainer
 from moxie.core import DATABASE_URL
 
 
@@ -22,8 +22,17 @@ def jobs(request):
 def jobs(request, name):
     engine = yield from aiopg.sa.create_engine(DATABASE_URL)
     with (yield from engine) as conn:
-        jobs = yield from conn.execute(select([Job.__table__]).where(
-            Job.name == name
-        ).limit(1))
+
+        query = select(
+            [Job.__table__, Maintainer.__table__,],
+            use_labels=True
+        ).select_from(join(
+            Maintainer.__table__,
+            Job.__table__,
+            Maintainer.id == Job.maintainer_id
+        )).where(Job.name == name).limit(1)
+
+        jobs = yield from conn.execute(query)
         job = yield from jobs.first()
+
         return request.render('job.html', {"job": job})
