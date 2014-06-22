@@ -37,11 +37,18 @@
       <div class="row">
         <div class="col-sm-3 col-md-2 sidebar">
           <ul class="nav nav-sidebar">
-            <li class="active"><a href="#">Overview</a></li>
-            <li><a href="#">Reports</a></li>
-            <li><a href="#">Analytics</a></li>
-            <li><a href="#">Export</a></li>
-          </ul>
+{% set navigation_bar = [
+    ('/', 'overview.html', 'Overview'),
+    ('/jobs/', 'jobs.html', 'Jobs'),
+    ('/maintainers/', 'maintainers.html', 'Maintainers')
+] -%}
+
+{% set active_page = moxie_template.name -%}
+    {% for href, id, caption in navigation_bar %}
+            <li{% if id == active_page %} class="active"{% endif %}><a href="{{ href|e }}">{{ caption|e }}</a></li>
+{% endfor %}
+</ul>
+
 <!--
           <ul class="nav nav-sidebar">
             <li><a href="">Nav item</a></li>
@@ -57,7 +64,6 @@
           </ul>
 -->
         </div>
-
 {% block content %}
 {% endblock %}
 

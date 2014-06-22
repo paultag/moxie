@@ -79,9 +79,11 @@ class MoxieHandler(aiohttp.server.ServerHttpProtocol):
         return response
 
     def render(self, template, context, *headers, code=200):
+        _c = dict(context)
         template = _jinja_env.get_template(template)
         response = self.make_response(code, *headers)
-        response.write(bytes(template.render(**context), self.ENCODING))
+        _c['moxie_template'] = template
+        response.write(bytes(template.render(**_c), self.ENCODING))
         response.write_eof()
         return response
 
