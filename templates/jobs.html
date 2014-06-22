@@ -1,25 +1,23 @@
-{% extends "base.html" %}
+{% extends "interface.html" %}
 
 {% block content %}
-        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-          <h2 class="sub-header">Jobs</h2>
-          <div class="table-responsive">
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th>Job ID</th>
-                  <th>Description</th>
-                </tr>
-              </thead>
-              <tbody>
+  <h2 class="sub-header">Jobs</h2>
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Job ID</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
 {% for job in jobs %}
-                <tr>
-                  <td><a href="/job/{{job.name}}/" >{{job.name}}</a></td>
-                  <td>{{job.description}}</td>
-                </tr>
+        <tr>
+          <td><a href="/job/{{job.name}}/" >{{job.name}}</a></td>
+          <td>{{job.description}}</td>
+        </tr>
 {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        </div>
+      </tbody>
+    </table>
+  </div>
 {% endblock %}

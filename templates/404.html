@@ -1,11 +1,17 @@
-<h1>Something went wrong!</h1>
+{% extends "bare.html" %}
 
-Oh no! We can't figure out where you want to go. Sorry about that!</br/>
+{% block content %}
+<h1>Something went wrong! <small>(sorry about that)</small></h1>
 
-We tried the following paths:
+We can't figure out where you want to go.<br />
+<br />
+<br />
+
+We tried the following paths:<br />
+<br />
 <ul>
     {% for route in routes %}
     <li>{{route[0]}}</li>
     {% endfor %}
 </ul>
-
+{% endblock %}

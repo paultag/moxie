@@ -1,9 +1,7 @@
-{% extends "base.html" %}
+{% extends "interface.html" %}
 
 {% block content %}
-    <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-        <h2>{{job.job_description}} <small>({{job.job_name}})</small></h2>
-        This job is maintained by
-        <a href="/maintainer/{{job.maintainer_id}}/">{{job.maintainer_name}}</a>.
-    </div>
+    <h2>{{job.job_description}} <small>({{job.job_name}})</small></h2>
+    This job is maintained by
+    <a href="/maintainer/{{job.maintainer_id}}/">{{job.maintainer_name}}</a>.
 {% endblock %}
