@@ -8,6 +8,11 @@ from moxie.core import DATABASE_URL
 
 app = MoxieApp()
 
+
+@app.register("^/$")
+def overview(request):
+    return request.render('overview.html', {})
+
 @app.register("^jobs/$")
 def jobs(request):
     engine = yield from aiopg.sa.create_engine(DATABASE_URL)
