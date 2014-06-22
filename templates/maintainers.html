@@ -1,0 +1,23 @@
+{% extends "interface.html" %}
+
+{% block content %}
+  <h2 class="sub-header">Maintainers</h2>
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Maintainer Name</th>
+          <th>Maintainer Email</th>
+        </tr>
+      </thead>
+      <tbody>
+{% for maintainer in maintainers %}
+        <tr>
+          <td><a href="/maintainer/{{maintainer.id}}/" >{{maintainer.name}}</a></td>
+          <td><a href="mailto:{{maintainer.email}}">{{maintainer.email}}</a></td>
+        </tr>
+{% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

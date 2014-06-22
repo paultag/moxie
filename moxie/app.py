@@ -24,6 +24,21 @@ def jobs(request):
         })
 
 
+@app.register("^maintainers/$")
+def maintainers(request):
+    engine = yield from aiopg.sa.create_engine(DATABASE_URL)
+    with (yield from engine) as conn:
+        res = yield from conn.execute(Maintainer.__table__.select())
+        return request.render('maintainers.html', {
+            "maintainers": res
+        })
+
+
+@app.register("^maintainer/(?P<id>.*)/$")
+def maintainers(request, id):
+    return request.render('maintainer.html', {})
+
+
 @app.register("^job/(?P<name>.*)/$")
 def jobs(request, name):
     engine = yield from aiopg.sa.create_engine(DATABASE_URL)
