@@ -36,7 +36,21 @@ def maintainers(request):
 
 @app.register("^maintainer/(?P<id>.*)/$")
 def maintainers(request, id):
-    return request.render('maintainer.html', {})
+    engine = yield from aiopg.sa.create_engine(DATABASE_URL)
+    with (yield from engine) as conn:
+        maintainers = yield from conn.execute(select(
+            [Maintainer.__table__]).where(Maintainer.id == id)
+        )
+        maintainer = yield from maintainers.first()
+
+        jobs = yield from conn.execute(select([Job.__table__]).where(
+            Job.maintainer_id == id
+        ))
+
+        return request.render('maintainer.html', {
+            "maintainer": maintainer,
+            "jobs": jobs
+        })
 
 
 @app.register("^job/(?P<name>.*)/$")
@@ -44,16 +58,14 @@ def jobs(request, name):
     engine = yield from aiopg.sa.create_engine(DATABASE_URL)
     with (yield from engine) as conn:
 
-        query = select(
+        jobs = yield from conn.execute(select(
             [Job.__table__, Maintainer.__table__,],
             use_labels=True
         ).select_from(join(
             Maintainer.__table__,
             Job.__table__,
             Maintainer.id == Job.maintainer_id
-        )).where(Job.name == name).limit(1)
+        )).where(Job.name == name).limit(1))
 
-        jobs = yield from conn.execute(query)
         job = yield from jobs.first()
-
         return request.render('job.html', {"job": job})
