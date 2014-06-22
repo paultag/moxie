@@ -2,22 +2,5 @@
 
 {% block content %}
   <h2 class="sub-header">{{maintainer.name}}'s Jobs <small><a href="mailto:{{maintainer.email}}">{{maintainer.email}}</a></small></h2>
-  <div class="table-responsive">
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Job ID</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-{% for job in jobs %}
-        <tr>
-          <td><a href="/job/{{job.name}}/" >{{job.name}}</a></td>
-          <td>{{job.description}}</td>
-        </tr>
-{% endfor %}
-      </tbody>
-    </table>
-  </div>
+{% include "fragments/jobs.html" %}
 {% endblock %}
