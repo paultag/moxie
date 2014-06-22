@@ -12,6 +12,7 @@ setup(
     entry_points={
         'console_scripts': [
             'moxie-init = moxie.cli:init',
+            'moxie-load = moxie.cli:load',
             'moxie-serve = moxie.cli:serve',
         ]
     },
