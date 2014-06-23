@@ -1,6 +1,7 @@
-square = (x) -> x * x
 
-math =
-  root:   Math.sqrt
-  square: square
-  cube:   (x) -> x * square x
+
+console.log("NOTIFICATION")
+Notification.requestPermission((status) ->
+  console.log(status)
+  n = new Notification("title", {body: "notification body"})
+)

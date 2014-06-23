@@ -1,7 +1,6 @@
 import aiopg.sa
 import asyncio
 import aiohttp
-from aiohttp import websocket
 from aiodocker.docker import Docker
 
 import json
@@ -15,24 +14,14 @@ app = MoxieApp()
 docker = Docker()
 
 
-@app.register("^websocket/events/$")
+@app.websocket("^websocket/events/$")
 def stream(request):
-    status, headers, parser, writer = websocket.do_handshake(
-        request.message.method, request.message.headers,
-        request.handler.transport)
-
-    resp = aiohttp.Response(request.handler.writer, status,
-                            http_version=request.message.version)
-    resp.add_headers(*headers)
-    resp.send_headers()
-
     events = docker.events
     events.saferun()
-
     queue = events.listen()
     while True:
         event = yield from queue.get()
-        writer.send(json.dumps({"status": event.get("status")}))
+        request.writer.send(json.dumps({"status": event.get("status")}))
 
 
 @app.register("^/$")

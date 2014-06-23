@@ -7,6 +7,7 @@ import mimetypes
 import asyncio
 import aiohttp
 import aiohttp.server
+from aiohttp import websocket
 
 _jinja_env = jinja2.Environment(
     loader=jinja2.FileSystemLoader('templates')
@@ -28,6 +29,25 @@ class MoxieApp(object):
             self.routes.append((path, func))
             return func
         return _
+
+    def websocket(self, path):
+        def _(fn):
+            @self.register(path)
+            def _r(request, *args, **kwargs):
+                status, headers, parser, writer = websocket.do_handshake(
+                    request.message.method, request.message.headers,
+                    request.handler.transport)
+
+                resp = aiohttp.Response(request.handler.writer, status,
+                                        http_version=request.message.version)
+                resp.add_headers(*headers)
+                resp.send_headers()
+                request.writer = writer
+                request.reader = request.handler.reader.set_parser(parser)
+                yield from fn(request, *args, **kwargs)
+            return _r
+        return _
+
 
     def _error_500(self, request, reason):
         return request.render('500.html', {
