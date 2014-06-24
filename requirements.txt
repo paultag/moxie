@@ -4,3 +4,9 @@ aiodocker
 sqlalchemy
 jinja2
 pyyaml
+
+
+# Needed to build the scripts.
+# node-uglify
+# node-less
+# coffeescript
