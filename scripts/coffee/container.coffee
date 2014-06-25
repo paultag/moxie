@@ -1,4 +1,17 @@
-ws = new WebSocket("ws://localhost:8888/websocket/stream/test-job-six/")
+$(document).ready () ->
+    ws = new WebSocket("ws://localhost:8888/websocket/stream/test-job-six/")
+    ws.onopen = (e) -> 
+        term = new Terminal({
+            cols: 80,
+            rows: 24,
+            useStyle: false,
+        })
 
-ws.onmessage = (e) -> 
-    console.log(e)
+        content = $("#main-content")
+        term.open(content.get(0))
+
+        ws.onmessage = (data) ->
+            term.write(data.data)
+
+        ws.onclose = (e) ->
+            term.destroy()

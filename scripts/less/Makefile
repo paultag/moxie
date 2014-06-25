@@ -1,4 +1,4 @@
-LESS_SCRIPTS = theme.css
+LESS_SCRIPTS = theme.css container.css
 
 LESSC = lessc
 LESSCFLAGS = -x
