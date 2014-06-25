@@ -57,7 +57,7 @@ def load():
         if o is None:
             j = Job(**job)
             print("Inserting: ", job['name'])
-            session.add(m)
+            session.add(j)
         else:
             print("   DB Has: ", job['name'])
 
