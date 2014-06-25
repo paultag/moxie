@@ -1,4 +1,4 @@
-COFFEE_SCRIPTS = test.min.js
+COFFEE_SCRIPTS = container.min.js
 
 .SUFFIXES:
 .SUFFIXES: .coffee .js .min.js
