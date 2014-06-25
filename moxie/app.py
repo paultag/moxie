@@ -24,6 +24,18 @@ def stream(request):
         request.writer.send(json.dumps({"status": event.get("status")}))
 
 
+@app.websocket("^websocket/stream/(?P<container>.*)/$")
+def stream(request, container):
+    container = yield from docker.containers.get(container)
+    logs = container.logs
+
+    logs.saferun()
+    queue = logs.listen()
+    while True:
+        out = yield from queue.get()
+        request.writer.send(out)
+
+
 @app.register("^/$")
 def overview(request):
     return request.render('overview.html', {})
