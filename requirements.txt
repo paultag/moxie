@@ -4,6 +4,7 @@ aiodocker
 sqlalchemy
 jinja2
 pyyaml
+websockets
 
 
 # Needed to build the scripts.
