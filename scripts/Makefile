@@ -1,6 +1,8 @@
 all: build install
 
 build:
+	make -C coffee clean
+	make -C less clean
 	make -C coffee build
 	make -C less build
 

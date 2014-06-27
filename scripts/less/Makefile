@@ -7,9 +7,12 @@ STATIC = static
 .SUFFIXES:
 .SUFFIXES: .less .css
 
-all: build
+all: clean build
 
 build: $(LESS_SCRIPTS)
+
+clean:
+	rm -v $(LESS_SCRIPTS)
 
 .less.css:
 	$(LESSC) $(LESSCFLAGS) $< > $@
