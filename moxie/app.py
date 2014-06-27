@@ -28,7 +28,6 @@ def stream(request):
 def stream(request, container):
     container = yield from docker.containers.get(container)
     logs = container.logs
-
     logs.saferun()
     queue = logs.listen()
     while True:

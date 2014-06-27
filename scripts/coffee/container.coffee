@@ -1,5 +1,5 @@
 $(document).ready () ->
-    ws = new WebSocket("ws://localhost:8888/websocket/stream/test-job-six/")
+    ws = new WebSocket("ws://localhost:8888/websocket/stream/" + job + "/")
     ws.onopen = (e) -> 
         term = new Terminal({
             cols: 80,
