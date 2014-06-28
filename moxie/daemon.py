@@ -5,7 +5,7 @@ from aiodocker.docker import Docker
 import shlex
 import random
 import aiopg.sa
-from sqlalchemy import update
+from sqlalchemy import update, insert, select
 
 import asyncio
 import datetime as dt
@@ -50,9 +50,21 @@ def reap(job):
     Clean up the container, write the log out, save the status.
     """
     container = yield from getc(job)
-    running = container._container.get(
-        "State", {}).get("Running", False)
-    print(running)
+
+    state = container._container.get("State", {})
+    running = state.get("Running", False)
+
+    if running is True:
+        raise ValueError("Asked to reap a bad container")
+
+    exit = int(state.get("ExitCode", -1))
+
+    # engine = yield from aiopg.sa.create_engine(DATABASE_URL)
+    # with (yield from engine) as conn:
+    #     pass
+    return
+
+    raise ValueError
 
 
 @asyncio.coroutine
@@ -74,7 +86,11 @@ def start(job):
     if container:
         cfg = container._container
         if cfg['Args'] != cmd or cfg['Image'] != job.image:
-            yield from container.delete()
+            try:
+                yield from container.delete()
+            except ValueError:
+                print("Caught some shit from the FS")
+                pass  # Sometimes the FS gives you some shit.
             container = None
 
     if container is None:
@@ -152,6 +168,13 @@ def up(job):
     # OK. Now we're sure the container is not on and reaped.
 
     while True:
+        engine = yield from aiopg.sa.create_engine(DATABASE_URL)
+        with (yield from engine) as conn:
+            jobs = yield from conn.execute(select(
+                [Job.__table__]).where(job.name == job.name)
+            )
+            job = yield from jobs.first()
+
         delta = (dt.datetime.utcnow() - job.scheduled)
         seconds = delta.seconds
         seconds = 0 if seconds > 0 else -seconds
