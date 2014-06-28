@@ -11,7 +11,7 @@ jobs:
       maintainer_id: 1
       # interval: 86400
       interval: 60
-      command: "update --scrape holyoke"
+      command: "update holyoke"
       image: "paultag/scrapers-us-municipal"
       env:
           DATABASE_URL: "postgis://opencivicdata:test@10.42.2.101/opencivicdata"
@@ -20,7 +20,7 @@ jobs:
       maintainer_id: 2
       # interval: 86400
       interval: 60
-      command: "update --scrape nyc"
+      command: "update nyc"
       image: "paultag/scrapers-us-municipal"
       env:
           DATABASE_URL: "postgis://opencivicdata:test@10.42.2.101/opencivicdata"
