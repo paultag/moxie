@@ -1,0 +1,18 @@
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Run ID</th>
+          <th>Failed</th>
+        </tr>
+      </thead>
+      <tbody>
+{% for run in runs %}
+        <tr>
+          <td>{{run.id}}</td>
+          <td><span class="label {% if not run.failed %}label-success{% else %}label-danger{% endif %}">{{run.failed}}</span></td>
+        </tr>
+{% endfor %}
+      </tbody>
+    </table>
+  </div>

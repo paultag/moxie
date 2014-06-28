@@ -38,6 +38,8 @@ class Run(Base):
     __tablename__ = 'run'
     id = Column(Integer, primary_key=True)
     failed = Column(Boolean)
+    job_id = Column(Integer, ForeignKey('job.id'))
+    job = relationship("Job", foreign_keys=[job_id], backref='runs')
 
 
 class JobEnv(Base):

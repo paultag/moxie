@@ -1,5 +1,5 @@
 from moxie.core import DATABASE_URL
-from moxie.models import Job, JobEnv
+from moxie.models import Job, JobEnv, Run
 from aiodocker.docker import Docker
 
 import shlex
@@ -70,6 +70,11 @@ def reap(job):
                 active=False,
             ))
 
+        runid = yield from conn.scalar(insert(
+            Run.__table__).values(
+                failed=True if exit != 0 else False,
+                job_id=job.id,
+            ))
     print("Reaped.")
 
 

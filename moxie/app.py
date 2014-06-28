@@ -7,7 +7,7 @@ import json
 import humanize.time
 from sqlalchemy import select, join
 from moxie.server import MoxieApp
-from moxie.models import Job, Maintainer
+from moxie.models import Job, Maintainer, Run
 from moxie.core import DATABASE_URL
 
 
@@ -81,7 +81,7 @@ def maintainers(request, id):
 
 
 @app.register("^job/(?P<name>.*)/$")
-def jobs(request, name):
+def job(request, name):
     engine = yield from aiopg.sa.create_engine(DATABASE_URL)
     with (yield from engine) as conn:
 
@@ -93,10 +93,15 @@ def jobs(request, name):
             Job.__table__,
             Maintainer.id == Job.maintainer_id
         )).where(Job.name == name).limit(1))
-
         job = yield from jobs.first()
+
+        runs = yield from conn.execute(select([Run.__table__]).where(
+            Run.job_id == job.job_id
+        ))
+
         return request.render('job.html', {
             "job": job,
+            "runs": runs,
             "interval": humanize.time.naturaldelta(job.job_interval),
             "next_run": humanize.naturaltime(job.job_scheduled),
         })
