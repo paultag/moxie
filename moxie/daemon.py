@@ -37,18 +37,14 @@ def reap(container):
 
 @asyncio.coroutine
 def wait(container):
-    """
-    Wait for the right time to run a container, then wait for it
-    to finish. This is the sleepy-state.
-    """
+    """ Wait for a container to stop. """
     pass
 
 
 @asyncio.coroutine
 def start(container):
     """
-    Start up the container for the job. Write the state back to the
-    DB.
+    Start up the container for the job. Write the state back to the DB.
     """
     pass
 
@@ -58,6 +54,12 @@ def up(job):
     """
     Establish state. Enter state at the right point. Handle failure
     gracefully. Write new state back to DB.
+
+        -> Check if running is true and container is off.
+           If so, enter reap state. Reap.
+        -> Check if running currently. If so, wait state.
+        -> Check if scheduled in the past. If so, start.
+        -> Apply the timedelta to the above, schedule start then.
     """
     print(job)
 
