@@ -15,6 +15,7 @@ setup(
             'moxie-load = moxie.cli:load',
             'moxie-serve = moxie.cli:serve',
             'moxie-attach = moxie.cli:attach',
+            'moxied = moxie.daemon:run',
         ]
     },
     packages=find_packages(),

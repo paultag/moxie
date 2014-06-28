@@ -1,3 +1,8 @@
+from moxie.core import DATABASE_URL
+from moxie.models import Job
+
+import aiopg.sa
+import asyncio
 
 """
 OK. So, there's some method here. Here are the core concepts:
@@ -22,6 +27,7 @@ OK. So, there's some method here. Here are the core concepts:
 """
 
 
+@asyncio.coroutine
 def reap(container):
     """
     Clean up the container, write the log out, save the status.
@@ -29,6 +35,7 @@ def reap(container):
     pass
 
 
+@asyncio.coroutine
 def wait(container):
     """
     Wait for the right time to run a container, then wait for it
@@ -37,6 +44,7 @@ def wait(container):
     pass
 
 
+@asyncio.coroutine
 def start(container):
     """
     Start up the container for the job. Write the state back to the
@@ -45,16 +53,26 @@ def start(container):
     pass
 
 
+@asyncio.coroutine
 def up(job):
     """
     Establish state. Enter state at the right point. Handle failure
     gracefully. Write new state back to DB.
     """
-    pass
+    print(job)
 
 
+@asyncio.coroutine
 def main():
     """
     Start an `up` coroutine for each job.
     """
-    pass
+    engine = yield from aiopg.sa.create_engine(DATABASE_URL)
+    with (yield from engine) as conn:
+        res = yield from conn.execute(Job.__table__.select())
+        jobs = [asyncio.async(up(x)) for x in res]
+        yield from asyncio.gather(*jobs)
+
+
+def run():
+    asyncio.get_event_loop().run_until_complete(main())
