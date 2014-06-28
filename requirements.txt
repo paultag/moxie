@@ -5,7 +5,7 @@ sqlalchemy
 jinja2
 pyyaml
 websockets
-
+humanize
 
 # Needed to build the scripts.
 # node-uglify

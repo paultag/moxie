@@ -4,6 +4,7 @@ import aiohttp
 from aiodocker.docker import Docker
 
 import json
+import humanize.time
 from sqlalchemy import select, join
 from moxie.server import MoxieApp
 from moxie.models import Job, Maintainer
@@ -46,7 +47,7 @@ def jobs(request):
     with (yield from engine) as conn:
         res = yield from conn.execute(Job.__table__.select())
         return request.render('jobs.html', {
-            "jobs": res
+            "jobs": res,
         })
 
 
@@ -94,7 +95,11 @@ def jobs(request, name):
         )).where(Job.name == name).limit(1))
 
         job = yield from jobs.first()
-        return request.render('job.html', {"job": job})
+        return request.render('job.html', {
+            "job": job,
+            "interval": humanize.time.naturaldelta(job.job_interval),
+            "next_run": humanize.naturaltime(job.job_scheduled),
+        })
 
 
 @app.register("^container/(?P<name>.*)/$")
