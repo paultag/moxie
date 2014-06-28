@@ -17,6 +17,7 @@ class Job(Base):
     image = Column(String(255))
     scheduled = Column(DateTime)
     interval = Column(Interval)
+    active = Column(Boolean)
 
     maintainer_id = Column(Integer, ForeignKey('maintainer.id'))
     maintainer = relationship(

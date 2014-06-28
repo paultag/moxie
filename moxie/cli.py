@@ -82,6 +82,7 @@ def load():
             interval = dt.timedelta(seconds=interval)
             j = Job(scheduled=dt.datetime.utcnow(),
                     interval=interval,
+                    active=False,
                     **job)
             print("Inserting: ", job['name'])
             session.add(j)
