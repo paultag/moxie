@@ -48,6 +48,7 @@ def init():
 def load():
     import sys
     import yaml
+    import datetime as dt
     from sqlalchemy import create_engine
     from sqlalchemy.orm import sessionmaker
     from moxie.models import Base, Job, Maintainer
@@ -77,7 +78,11 @@ def load():
         ).first()
 
         if o is None:
-            j = Job(**job)
+            interval = job.pop('interval')
+            interval = dt.timedelta(seconds=interval)
+            j = Job(scheduled=dt.datetime.utcnow(),
+                    interval=interval,
+                    **job)
             print("Inserting: ", job['name'])
             session.add(j)
         else:

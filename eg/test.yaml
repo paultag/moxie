@@ -9,18 +9,36 @@ jobs:
     - name: "test-job-one"
       description: "Test Job number One"
       maintainer_id: 1
+      interval: 86400
+      command: "update holyoke"
+      image: "paultag/pupa"
     - name: "test-job-two"
       description: "Test Job number Two"
       maintainer_id: 1
+      interval: 86400
+      command: "update holyoke"
+      image: "paultag/pupa"
     - name: "test-job-three"
       description: "Test Job number Three"
       maintainer_id: 1
+      interval: 86400
+      command: "update holyoke"
+      image: "paultag/pupa"
     - name: "test-job-four"
       description: "Test Job number Four"
       maintainer_id: 2
+      interval: 86400
+      command: "update holyoke"
+      image: "paultag/pupa"
     - name: "test-job-five"
       description: "Test Job number Five"
       maintainer_id: 2
+      interval: 86400
+      command: "update holyoke"
+      image: "paultag/pupa"
     - name: "test-job-six"
       description: "Test Job number Six"
       maintainer_id: 2
+      interval: 86400
+      command: "update holyoke"
+      image: "paultag/pupa"
