@@ -59,12 +59,18 @@ def reap(job):
 
     exit = int(state.get("ExitCode", -1))
 
-    # engine = yield from aiopg.sa.create_engine(DATABASE_URL)
-    # with (yield from engine) as conn:
-    #     pass
-    return
+    engine = yield from aiopg.sa.create_engine(DATABASE_URL)
+    with (yield from engine) as conn:
+        yield from conn.execute(
+            update(
+                Job.__table__
+            ).where(
+                Job.name==job.name
+            ).values(
+                active=False,
+            ))
 
-    raise ValueError
+    print("Reaped.")
 
 
 @asyncio.coroutine
@@ -84,13 +90,13 @@ def start(job):
     cmd = shlex.split(job.command)
 
     if container:
+        if container._container.get(
+                "State", {}).get("Running", False) is True:
+            raise ValueError("Container {} still running!".format(job.name))
+
         cfg = container._container
         if cfg['Args'] != cmd or cfg['Image'] != job.image:
-            try:
-                yield from container.delete()
-            except ValueError:
-                print("Caught some shit from the FS")
-                pass  # Sometimes the FS gives you some shit.
+            yield from container.delete()
             container = None
 
     if container is None:
