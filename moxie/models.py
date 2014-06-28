@@ -38,3 +38,14 @@ class Run(Base):
     __tablename__ = 'run'
     id = Column(Integer, primary_key=True)
     failed = Column(Boolean)
+
+
+class JobEnv(Base):
+    __tablename__ = 'job_env'
+    id = Column(Integer, primary_key=True)
+
+    job_id = Column(Integer, ForeignKey('job.id'))
+    job = relationship("Job", foreign_keys=[job_id], backref='env')
+
+    key = Column(String(255))
+    value = Column(String(255))

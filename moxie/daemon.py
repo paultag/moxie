@@ -1,5 +1,5 @@
 from moxie.core import DATABASE_URL
-from moxie.models import Job
+from moxie.models import Job, JobEnv
 from aiodocker.docker import Docker
 
 import shlex
@@ -82,12 +82,16 @@ def wait(job):
 
 
 @asyncio.coroutine
-def start(job):
-    """
-    Start up the container for the job. Write the state back to the DB.
-    """
+def init(job):
     container = yield from getc(job)
     cmd = shlex.split(job.command)
+
+    engine = yield from aiopg.sa.create_engine(DATABASE_URL)
+    with (yield from engine) as conn:
+        jobenvs = yield from conn.execute(select([
+            JobEnv.__table__]).where(JobEnv.job_id==job.id))
+
+    env = ["{key}={value}".format(**x) for x in jobenvs]
 
     if container:
         if container._container.get(
@@ -104,7 +108,7 @@ def start(job):
         container = yield from docker.containers.create(
             {"Cmd": cmd,
              "Image": job.image,
-             # "Env" env
+             "Env": env,
              "AttachStdin": True,
              "AttachStdout": True,
              "AttachStderr": True,
@@ -115,6 +119,12 @@ def start(job):
              "StdinOnce": False},
             name=job.name)
 
+    return container
+
+
+def start(job):
+    print("Starting: {}".format(job.name))
+    container = yield from getc(job)
     yield from container.start({
         "Binds": [],
         "Privileged": False,
@@ -135,8 +145,7 @@ def start(job):
                 scheduled=reschedule,
             ))
 
-    yield from container.wait()
-    yield from reap(job)
+    yield from wait(job)
 
 
 @asyncio.coroutine
@@ -154,6 +163,7 @@ def up(job):
     active = job.active
     running = None
 
+    print("Entering: {}".format(job.name))
     yield from asyncio.sleep(random.randint(1, 10))
 
     container = yield from getc(job)
@@ -172,18 +182,19 @@ def up(job):
             yield from wait(job)
 
     # OK. Now we're sure the container is not on and reaped.
-
+    yield from init(job)
+    engine = yield from aiopg.sa.create_engine(DATABASE_URL)
     while True:
-        engine = yield from aiopg.sa.create_engine(DATABASE_URL)
         with (yield from engine) as conn:
             jobs = yield from conn.execute(select(
-                [Job.__table__]).where(job.name == job.name)
+                [Job.__table__]).where(Job.name == job.name)
             )
             job = yield from jobs.first()
 
         delta = (dt.datetime.utcnow() - job.scheduled)
-        seconds = delta.seconds
-        seconds = 0 if seconds > 0 else -seconds
+        seconds = -delta.total_seconds()
+        seconds = 0 if seconds < 0 else seconds
+
         print("[{}] => sleeping for {}".format(
             job.name,
             seconds
