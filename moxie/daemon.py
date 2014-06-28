@@ -73,11 +73,7 @@ def start(job):
 
     if container:
         cfg = container._container
-        if cfg['Args'] != cmd:
-            yield from container.delete()
-            container = None
-
-        if cfg['Image'] != job.image:
+        if cfg['Args'] != cmd or cfg['Image'] != job.image:
             yield from container.delete()
             container = None
 
@@ -107,7 +103,7 @@ def start(job):
     engine = yield from aiopg.sa.create_engine(DATABASE_URL)
     with (yield from engine) as conn:
         reschedule = (dt.datetime.utcnow() + job.interval)
-        yield from conn.scalar(
+        yield from conn.execute(
             update(
                 Job.__table__
             ).where(
