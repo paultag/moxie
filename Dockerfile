@@ -8,6 +8,7 @@ RUN apt-get update && apt-get build-dep -y python3-psycopg2
 RUN mkdir -p /opt/pault.ag/
 ADD . /opt/pault.ag/moxie/
 RUN cd /opt/pault.ag/moxie; python3.4 /usr/bin/pip3 install -r requirements.txt
+RUN python3.4 /usr/bin/pip3 install -e /opt/pault.ag/moxie/
 RUN adduser \
     --system \
     --home=/moxie \
@@ -16,5 +17,6 @@ RUN adduser \
     --group \
     moxie
 
+WORKDIR /opt/pault.ag/moxie
 USER moxie
 CMD ["moxie-serve"]
