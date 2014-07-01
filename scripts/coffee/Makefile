@@ -10,7 +10,7 @@ all: build
 build: $(COFFEE_SCRIPTS)
 
 clean:
-	rm -v $(COFFEE_SCRIPTS)
+	rm -fv $(COFFEE_SCRIPTS)
 
 .coffee.js:
 	coffee -c $<

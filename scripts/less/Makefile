@@ -12,7 +12,7 @@ all: clean build
 build: $(LESS_SCRIPTS)
 
 clean:
-	rm -v $(LESS_SCRIPTS)
+	rm -fv $(LESS_SCRIPTS)
 
 .less.css:
 	$(LESSC) $(LESSCFLAGS) $< > $@

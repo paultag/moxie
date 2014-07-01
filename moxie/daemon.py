@@ -1,5 +1,5 @@
 from moxie.core import DATABASE_URL
-from moxie.models import Job, JobEnv, Run
+from moxie.models import Job, JobEnv, JobVolume, Run
 from aiodocker.docker import Docker
 
 import shlex
@@ -12,28 +12,6 @@ import datetime as dt
 
 docker = Docker()
 
-"""
-OK. So, there's some method here. Here are the core concepts:
-
-    needs-run  = needs to be run. We're overdue. Needs to run *now*.
-                 + reap the process (ensure it has been reaped)
-                 + start the build, put into running state
-    running    = Something that is currently running.
-                 + wait it out. put into reapable state.
-    reapable   = Something that needs to be recorded as finished.
-                 + reap
-                     + record exit status
-                     + dump logs
-
-
-         +--- ensure --+
-         v             |
-       [REAPED] -> [RUNNING]
-         ^             |
-         |           (lag)
-         |             |
-         +-------- [REAPABLE]
-"""
 
 @asyncio.coroutine
 def getc(job):
@@ -96,7 +74,11 @@ def init(job):
         jobenvs = yield from conn.execute(select([
             JobEnv.__table__]).where(JobEnv.job_id==job.id))
 
+        volumes = yield from conn.execute(select([
+            JobVolume.__table__]).where(JobVolume.job_id==job.id))
+
     env = ["{key}={value}".format(**x) for x in jobenvs]
+    volumes = {x.host: x.container for x in volumes}
 
     if container:
         if container._container.get(
@@ -118,7 +100,7 @@ def init(job):
              "AttachStdout": True,
              "AttachStderr": True,
              "ExposedPorts": [],
-             "Volumes": [],
+             "Volumes": volumes,
              "Tty": True,
              "OpenStdin": False,
              "StdinOnce": False},
@@ -130,14 +112,22 @@ def init(job):
 def start(job):
     print("Starting: {}".format(job.name))
     container = yield from getc(job)
+
+    engine = yield from aiopg.sa.create_engine(DATABASE_URL)
+    with (yield from engine) as conn:
+        volumes = yield from conn.execute(select([
+            JobVolume.__table__]).where(JobVolume.job_id==job.id))
+
+        binds = ["{host}:{container}".format(
+            host=x.host, container=x.container) for x in volumes]
+
     yield from container.start({
-        "Binds": [],
+        "Binds": binds,
         "Privileged": False,
         "PortBindings": [],
         "Links": [],
     })
 
-    engine = yield from aiopg.sa.create_engine(DATABASE_URL)
     with (yield from engine) as conn:
         reschedule = (dt.datetime.utcnow() + job.interval)
         yield from conn.execute(

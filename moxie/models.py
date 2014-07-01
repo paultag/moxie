@@ -51,3 +51,14 @@ class JobEnv(Base):
 
     key = Column(String(255))
     value = Column(String(255))
+
+
+class JobVolume(Base):
+    __tablename__ = 'job_volume'
+    id = Column(Integer, primary_key=True)
+
+    job_id = Column(Integer, ForeignKey('job.id'))
+    job = relationship("Job", foreign_keys=[job_id], backref='volumes')
+
+    host = Column(String(255))
+    container = Column(String(255))
