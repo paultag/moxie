@@ -28,6 +28,7 @@ def reap(job):
     Clean up the container, write the log out, save the status.
     """
     container = yield from getc(job)
+    log = yield from container.log(stdout=True, stderr=True)
 
     state = container._container.get("State", {})
     running = state.get("Running", False)
@@ -52,6 +53,7 @@ def reap(job):
             Run.__table__).values(
                 failed=True if exit != 0 else False,
                 job_id=job.id,
+                log=log,
             ))
     print("Reaped.")
 

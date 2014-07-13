@@ -22,7 +22,10 @@ def stream(request):
     queue = events.listen()
     while True:
         event = yield from queue.get()
-        request.writer.send(json.dumps({"status": event.get("status")}))
+
+        request.writer.send(json.dumps({
+            "status": event.get("status"),
+        }))
 
 
 @app.websocket("^websocket/stream/(?P<container>.*)/$")

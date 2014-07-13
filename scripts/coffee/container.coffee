@@ -15,3 +15,8 @@ $(document).ready () ->
 
         ws.onclose = (e) ->
             term.destroy()
+
+    ews = new WebSocket("ws://localhost:8888/websocket/events/")
+    ews.onopen = (e) -> 
+        ews.onmessage = (data) ->
+            console.log(data)

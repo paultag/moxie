@@ -2,7 +2,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import (Table, Column, ForeignKey, UniqueConstraint,
                         Integer, String, DateTime, Boolean, MetaData,
-                        Interval, DateTime)
+                        Interval, DateTime, Text)
 
 metadata = MetaData()
 Base = declarative_base(metadata=metadata)
@@ -40,6 +40,7 @@ class Run(Base):
     failed = Column(Boolean)
     job_id = Column(Integer, ForeignKey('job.id'))
     job = relationship("Job", foreign_keys=[job_id], backref='runs')
+    log = Column(Text)
 
 
 class JobEnv(Base):
