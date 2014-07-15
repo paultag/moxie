@@ -10,7 +10,13 @@
 {% for run in runs %}
         <tr>
           <td>{{run.id}}</td>
-          <td><span class="label {% if not run.failed %}label-success{% else %}label-danger{% endif %}">{{run.failed}}</span></td>
+          <td>
+              {% if not run.failed %}
+                  <span class="label label-success">Totally Great!</span>
+              {% else %}
+                  <span class="label label-danger">:(</span>
+              {% endif %}
+          </td>
         </tr>
 {% endfor %}
       </tbody>
