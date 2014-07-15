@@ -1,5 +1,5 @@
 aiopg
-aiohttp
+aiohttp==0.8.4 # https://github.com/KeepSafe/aiohttp/issues/121
 aiodocker
 sqlalchemy
 jinja2

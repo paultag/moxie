@@ -12,7 +12,7 @@ jobs:
       command: "/opt/paultag/vcs/docron"
       image: "paultag/vcs-mirror"
       volumes:
-          - host: "/srv/leliel.pault.ag/dev/vcs/"
+          - host: "/srv/cassiel.pault.ag/dev/vcs/"
             container: "/vcs/"
       env:
           VCS_MIRROR_KEY: "/vcs/keys/id_fredbot"
