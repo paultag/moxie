@@ -29,6 +29,7 @@ def reap(job):
     """
     container = yield from getc(job)
     log = yield from container.log(stdout=True, stderr=True)
+    log = log.decode('utf-8')
 
     state = container._container.get("State", {})
     running = state.get("Running", False)

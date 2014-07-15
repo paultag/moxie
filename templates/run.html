@@ -1,0 +1,19 @@
+{% extends "interface.html" %}
+
+{% block content %}
+<h2>Run {{run.id}}</h2>
+
+This build was a massive
+{% if run.failed %}
+    <span class="label label-danger">failure</span>
+{% else %}
+    <span class="label label-success">success</span>
+{% endif %}.
+<br />
+<br />
+
+<pre>
+{{log}}
+</pre>
+
+{% endblock %}

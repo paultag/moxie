@@ -53,6 +53,18 @@ def jobs(request):
             "jobs": res,
         })
 
+@app.register("^run/(?P<key>.*)/$")
+def maintainers(request, key):
+    engine = yield from aiopg.sa.create_engine(DATABASE_URL)
+    with (yield from engine) as conn:
+        runs = yield from conn.execute(select(
+            [Run.__table__]).where(Run.id == key)
+        )
+        run = yield from runs.first()
+        return request.render('run.html', {
+            "run": run,
+        })
+
 
 @app.register("^maintainers/$")
 def maintainers(request):
