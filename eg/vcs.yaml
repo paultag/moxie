@@ -8,7 +8,7 @@ jobs:
       description: "Version Control Sync"
       maintainer_id: 1
       # interval: 86400
-      interval: 600
+      interval: 30
       command: "/opt/paultag/vcs/docron"
       image: "paultag/vcs-mirror"
       volumes:
