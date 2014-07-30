@@ -12,11 +12,16 @@ RUN apt-get update && apt-get install -y \
     coffeescript
 
 RUN apt-get update && apt-get build-dep -y python3-psycopg2
+
 RUN mkdir -p /opt/pault.ag/
 ADD . /opt/pault.ag/moxie/
-RUN cd /opt/pault.ag/moxie; python3.4 /usr/bin/pip3 install -r requirements.txt
-RUN python3.4 /usr/bin/pip3 install -e /opt/pault.ag/moxie/
-RUN make -C /opt/pault.ag/moxie/
 
+RUN cd /opt/pault.ag/moxie; python3.4 /usr/bin/pip3 install -r \
+        requirements.txt
+
+RUN python3.4 /usr/bin/pip3 install -e \
+        /opt/pault.ag/moxie/
+
+RUN make -C /opt/pault.ag/moxie/
 WORKDIR /opt/pault.ag/moxie
 CMD ["moxie-serve"]
