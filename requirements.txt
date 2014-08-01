@@ -2,6 +2,7 @@ aiopg
 # aiohttp>=0.9
 # Until https://github.com/KeepSafe/aiohttp/issues/131 is fixed
 -e git+https://github.com/paultag/aiohttp@bugfix/asyncio#egg=aiohttp
+-e git+https://github.com/paultag/aiodocker#egg=aiodocker
 sqlalchemy
 jinja2
 pyyaml
