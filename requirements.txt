@@ -1,6 +1,6 @@
 aiopg
-aiohttp
-aiodocker
+aiohttp>=0.9
+-e git+https://github.com/paultag/aiodocker#egg=aiodocker
 sqlalchemy
 jinja2
 pyyaml
