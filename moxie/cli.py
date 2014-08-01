@@ -23,8 +23,14 @@ def attach():
 def serve():
     import asyncio
     from moxie.app import app
+    import os
+
+    host = os.environ.get("MOXIE_HOST", "127.0.0.1")
+    port = int(os.environ.get("MOXIE_PORT", "8888"))
+
     loop = asyncio.get_event_loop()
-    coro = loop.create_server(app, '127.0.0.1', 8888)
+    coro = loop.create_server(app, host, port)
+
     server = loop.run_until_complete(coro)
     print('serving on {}'.format(server.sockets[0].getsockname()))
     try:
