@@ -9,6 +9,8 @@ Restart=always
 ExecStart=/bin/bash -c '/usr/bin/docker start -a moxie || \
     /usr/bin/docker run \
         --name moxie \
+        --privileged=true \
+        -v /run/docker.sock:/run/docker.sock \
         -v /srv/lucifer.pault.ag/prod/moxie:/moxie \
         -e DATABASE_URL=${DATABASE_URL} \
         -e MOXIE_HOST=${MOXIE_HOST} \

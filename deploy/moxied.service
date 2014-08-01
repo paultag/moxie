@@ -9,8 +9,10 @@ Restart=always
 ExecStart=/bin/bash -c '/usr/bin/docker start -a moxied || \
     /usr/bin/docker run \
         --name moxied \
+        --privileged=true \
+        -v /run/docker.sock:/run/docker.sock \
         -e DATABASE_URL=${DATABASE_URL} \
-        paultag/moxied \
+        paultag/moxie \
         moxied'
 ExecStop=/usr/bin/docker stop -t 5 moxied
 EnvironmentFile=/etc/docker/moxie.sh
