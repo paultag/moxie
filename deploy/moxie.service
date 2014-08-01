@@ -1,0 +1,22 @@
+[Unit]
+Description=Moxie web interface
+Author=Paul R. Tagliamonte <tag@pault.ag>
+Requires=docker.io.service
+After=postgres.service
+
+[Service]
+Restart=always
+ExecStart=/bin/bash -c '/usr/bin/docker start -a moxie || \
+    /usr/bin/docker run \
+        --name moxie \
+        -v /srv/lucifer.pault.ag/prod/moxie:/moxie \
+        -e DATABASE_URL=${DATABASE_URL} \
+        -e MOXIE_HOST=${MOXIE_HOST} \
+        -e MOXIE_PORT=${MOXIE_PORT} \
+        paultag/moxie \
+        moxie-serve'
+ExecStop=/usr/bin/docker stop -t 5 moxie
+EnvironmentFile=/etc/docker/moxie.sh
+
+[Install]
+WantedBy=multi-user.target

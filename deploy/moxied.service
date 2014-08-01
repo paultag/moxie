@@ -1,0 +1,20 @@
+[Unit]
+Description=Moxie Daemon
+Author=Paul R. Tagliamonte <tag@pault.ag>
+Requires=docker.io.service
+After=postgres.service
+
+[Service]
+Restart=always
+ExecStart=/bin/bash -c '/usr/bin/docker start -a moxied || \
+    /usr/bin/docker run \
+        --name moxied \
+        -e DATABASE_URL=${DATABASE_URL} \
+        paultag/moxied \
+        moxied'
+ExecStop=/usr/bin/docker stop -t 5 moxied
+EnvironmentFile=/etc/docker/moxie.sh
+
+[Install]
+WantedBy=multi-user.target
+
