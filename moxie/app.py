@@ -139,7 +139,7 @@ def container(request, name):
             container = yield from docker.containers.get(name)
         except ValueError:
             # No such Container.
-            return request.render('500.html', {
+            return request.render('container.offline.html', {
                 "reason": "No such container"
             }, code=404)
 

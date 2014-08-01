@@ -56,6 +56,9 @@ def reap(job):
                 job_id=job.id,
                 log=log,
             ))
+
+    yield from container.delete()
+    # XXX: In the future, use the log purge API endpoint.
     print("Reaped.")
 
 
@@ -68,8 +71,12 @@ def wait(job):
 
 
 @asyncio.coroutine
-def init(job):
+def create(job):
     container = yield from getc(job)
+
+    if container is not None:
+        raise ValueError("Error: Told to create container that exists.")
+
     cmd = shlex.split(job.command)
 
     engine = yield from aiopg.sa.create_engine(DATABASE_URL)
@@ -83,6 +90,28 @@ def init(job):
     env = ["{key}={value}".format(**x) for x in jobenvs]
     volumes = {x.host: x.container for x in volumes}
 
+    print("Creating new container")
+    container = yield from docker.containers.create(
+        {"Cmd": cmd,
+         "Image": job.image,
+         "Env": env,
+         "AttachStdin": True,
+         "AttachStdout": True,
+         "AttachStderr": True,
+         "ExposedPorts": [],
+         "Volumes": volumes,
+         "Tty": True,
+         "OpenStdin": False,
+         "StdinOnce": False},
+        name=job.name)
+    return container
+
+
+@asyncio.coroutine
+def init(job):
+    container = yield from getc(job)
+    cmd = shlex.split(job.command)
+
     if container:
         if container._container.get(
                 "State", {}).get("Running", False) is True:
@@ -94,20 +123,7 @@ def init(job):
             container = None
 
     if container is None:
-        print("Creating new container")
-        container = yield from docker.containers.create(
-            {"Cmd": cmd,
-             "Image": job.image,
-             "Env": env,
-             "AttachStdin": True,
-             "AttachStdout": True,
-             "AttachStderr": True,
-             "ExposedPorts": [],
-             "Volumes": volumes,
-             "Tty": True,
-             "OpenStdin": False,
-             "StdinOnce": False},
-            name=job.name)
+        yield from create(job)
 
     return container
 
@@ -115,6 +131,8 @@ def init(job):
 def start(job):
     print("Starting: {}".format(job.name))
     container = yield from getc(job)
+    if container is None:
+        container = yield from create(job)
 
     engine = yield from aiopg.sa.create_engine(DATABASE_URL)
     with (yield from engine) as conn:
