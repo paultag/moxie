@@ -1,0 +1,16 @@
+---
+maintainers:
+    - name: "Paul Tagliamonte"
+      email: paultag@example.com
+
+jobs:
+    - name: "scrapers-state-nh"
+      description: "New Hampshire Scrape"
+      maintainer_id: 1
+      # interval: 86400
+      interval: 30
+      command: "update nh people --fast"
+      image: "sunlightlabs/scrapers-us-state"
+      env:
+          SUNLIGHT_API_KEY: "ADDMEHERE"
+          DATABASE_URL: "postgis://opencivicdata:test@10.42.2.101/opencivicdata"
