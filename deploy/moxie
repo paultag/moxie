@@ -1,0 +1,8 @@
+#!/bin/bash
+source /etc/docker/moxie.sh
+
+docker run --rm -it \
+    -v /srv/lucifer.pault.ag/prod/moxie:/moxie \
+    -e DATABASE_URL=${DATABASE_URL} \
+    paultag/moxie \
+    bash
