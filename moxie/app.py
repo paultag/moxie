@@ -112,7 +112,7 @@ def job(request, name):
 
         runs = yield from conn.execute(select([Run.__table__]).where(
             Run.job_id == job.job_id
-        ))
+        ).order_by(Run.id.desc()))
 
         return request.render('job.html', {
             "job": job,
