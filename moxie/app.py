@@ -140,7 +140,8 @@ def container(request, name):
         except ValueError:
             # No such Container.
             return request.render('container.offline.html', {
-                "reason": "No such container"
+                "reason": "No such container",
+                "job": job,
             }, code=404)
 
         info = yield from container.show()
