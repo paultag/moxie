@@ -1,0 +1,4 @@
+#!/bin/bash
+
+ssh -t lucifer.pault.ag git -C ~tag/projects/moxie pull
+ssh -t lucifer.pault.ag ~tag/projects/moxie/deploy/upgrade.sh
