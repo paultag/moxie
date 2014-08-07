@@ -1,5 +1,5 @@
 aiopg
-aiohttp>=0.9
+-e git+https://github.com/KeepSafe/aiohttp#egg=aiohttp
 -e git+https://github.com/paultag/aiodocker#egg=aiodocker
 sqlalchemy
 jinja2
