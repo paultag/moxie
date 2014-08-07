@@ -18,9 +18,3 @@ env-sets:
       values:
           SUNLIGHT_API_KEY: "ADDMEHERE"
           DATABASE_URL: "postgis://opencivicdata:test@10.42.2.101/opencivicdata"
-
-volume-sets:
-    - name: "ocd"
-      values:
-          - host: "/srv/leliel.pault.ag/dev/ocd/"
-            container: "/ocd/"
