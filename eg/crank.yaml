@@ -7,9 +7,9 @@ jobs:
     - name: "crank-hy"
       description: "Crank (Hylang)"
       maintainer: "paultag@example.com"
-      interval: 86400
+      interval: 10
       # interval: 30
-      command: "/opt/pault.ag/crank/eg/hylang.hy"
+      command: "/opt/pault.ag/crank/eg/hy.hy"
       image: "paultag/crank"
       volumes: "crank"
 
