@@ -60,6 +60,11 @@ def init():
     ))
     command.stamp(alembic_cfg, "head")
 
+def _update(o, values):
+    for k, v in values.items():
+        setattr(o, k, v)
+    return o
+
 
 def load():
     import sys
@@ -67,52 +72,87 @@ def load():
     import datetime as dt
     from sqlalchemy import create_engine
     from sqlalchemy.orm import sessionmaker
-    from moxie.models import Base, Job, Maintainer, JobEnv, JobVolume
+    from moxie.models import (Base, Job, Maintainer,
+                              EnvSet, VolumeSet,
+                              Env, Volume)
     from moxie.core import DATABASE_URL
 
     engine = create_engine(DATABASE_URL)
     Session = sessionmaker(bind=engine)
     session = Session()
 
+    def get_one(table, *constraints):
+        return session.query(table).filter(*constraints).first()
+
     data = yaml.load(open(sys.argv[1], 'r'))
 
     for maintainer in data['maintainers']:
-        o = session.query(Maintainer).filter(
-            Maintainer.name == maintainer['name']
-        ).first()
+        o = get_one(Maintainer, Maintainer.name == maintainer['name'])
 
         if o is None:
             m = Maintainer(**maintainer)
             print("Inserting: ", maintainer['name'])
             session.add(m)
         else:
-            print("   DB Has: ", maintainer['name'])
+            session.add(_update(o, maintainer))
+            print("Updating:  ", maintainer['name'])
 
-    for job in data['jobs']:
-        o = session.query(Job).filter(
-            Job.name == job['name']
-        ).first()
+    session.commit()
+
+    for env in data['env-sets']:
+        name = env.pop('name')
+        values = env.pop('values')
+        if env != {}:
+            raise ValueError("Unknown keys: %s" % (", ".join(env.keys())))
+        o = get_one(EnvSet, EnvSet.name == name)
 
         if o is None:
-            interval = job.pop('interval')
-            interval = dt.timedelta(seconds=interval)
-            env = job.pop('env', {}).items()
-            volumes = job.pop('volumes', [])
+            print("Inserting:  Env: %s" % (name))
+            env = EnvSet(name=name)
+            session.add(env)
+            o = env
+        else:
+            print("Updating:   Env: %s" % (name))
+            deleted = session.query(Env).filter(Env.env_set_id == o.id).delete()
+            print("  => Deleted %s related envs" % (deleted))
 
-            j = Job(scheduled=dt.datetime.utcnow(),
-                    interval=interval,
-                    active=False,
-                    **job)
+        session.commit()
 
-            for k, v in env:
-                je = JobEnv(job=j, key=k, value=v)
+        for k, v in values.items():
+            session.add(Env(env_set_id=o.id, key=k, value=v))
 
-            for entry in volumes:
-                je = JobVolume(job=j, **entry)
+    session.commit()
 
+    for job in data['jobs']:
+        o = get_one(Job, Job.name == job['name'])
+
+        interval = job.pop('interval')
+        job['interval'] = dt.timedelta(seconds=interval)
+
+        job['maintainer'] = get_one(
+            Maintainer,
+            Maintainer.name == job['maintainer']
+        )
+
+        for k, v in [('env', EnvSet),
+                     ('volumes', VolumeSet)]:
+            if k not in job:
+                continue
+
+            name = job.pop(k)
+
+            ro = get_one(v, v.name == name)
+            if ro is None:
+                raise ValueError("Error: No such %s: %s" % (k, name))
+
+            job["%s_id" % (k)] = ro.id
+
+        if o is None:
+            j = Job(scheduled=dt.datetime.utcnow(), **job)
             print("Inserting: ", job['name'])
             session.add(j)
         else:
-            print("   DB Has: ", job['name'])
+            print("Updating:  ", job['name'])
+            session.add(_update(o, job))
 
     session.commit()

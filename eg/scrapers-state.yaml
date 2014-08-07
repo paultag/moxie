@@ -5,15 +5,22 @@ maintainers:
 
 jobs:
     - name: "scrapers-state-nh"
+      active: true
       description: "New Hampshire Scrape"
-      maintainer_id: "paultag@example.com"
+      maintainer: "paultag@example.com"
       interval: 30
       command: "update nh people --fast"
       image: "sunlightlabs/scrapers-us-state"
       env: "ocd"
 
-envs:
+env-sets:
     - name: "ocd"
       values:
           SUNLIGHT_API_KEY: "ADDMEHERE"
           DATABASE_URL: "postgis://opencivicdata:test@10.42.2.101/opencivicdata"
+
+volume-sets:
+    - name: "ocd"
+      values:
+          - host: "/srv/leliel.pault.ag/dev/ocd/"
+            container: "/ocd/"

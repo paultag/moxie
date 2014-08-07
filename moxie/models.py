@@ -62,11 +62,13 @@ class Run(Base):
 class EnvSet(Base):
     __tablename__ = 'env_set'
     id = Column(Integer, primary_key=True)
+    name = Column(String(255), unique=True)
 
 
 class VolumeSet(Base):
     __tablename__ = 'volume_set'
     id = Column(Integer, primary_key=True)
+    name = Column(String(255), unique=True)
 
 
 class Env(Base):
