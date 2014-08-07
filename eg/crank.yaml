@@ -12,6 +12,7 @@ jobs:
       # interval: 30
       command: "/opt/pault.ag/crank/eg/hylang.hy"
       image: "paultag/crank"
+      volumes: "crank"
 
 volume-sets:
     - name: "crank"
