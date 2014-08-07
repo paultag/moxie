@@ -1,5 +1,5 @@
 from moxie.core import DATABASE_URL
-from moxie.models import Job, JobEnv, JobVolume, Run
+from moxie.models import Job, Run, Env, Volume
 from aiodocker.docker import Docker
 
 import shlex
@@ -88,10 +88,10 @@ def create(job):
     engine = yield from aiopg.sa.create_engine(DATABASE_URL)
     with (yield from engine) as conn:
         jobenvs = yield from conn.execute(select([
-            JobEnv.__table__]).where(JobEnv.job_id==job.id))
+            Env.__table__]).where(Env.env_set_id==job.env_id))
 
         volumes = yield from conn.execute(select([
-            JobVolume.__table__]).where(JobVolume.job_id==job.id))
+            Volume.__table__]).where(Volume.volume_set_id==job.volumes_id))
 
     env = ["{key}={value}".format(**x) for x in jobenvs]
     volumes = {x.host: x.container for x in volumes}

@@ -5,7 +5,6 @@ maintainers:
 
 jobs:
     - name: "scrapers-state-nh"
-      active: true
       description: "New Hampshire Scrape"
       maintainer: "paultag@example.com"
       interval: 30

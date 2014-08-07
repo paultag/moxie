@@ -5,7 +5,6 @@ maintainers:
 
 jobs:
     - name: "crank-hy"
-      active: true
       description: "Crank (Hylang)"
       maintainer: "paultag@example.com"
       interval: 86400

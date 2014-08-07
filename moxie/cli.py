@@ -174,7 +174,7 @@ def load():
             job["%s_id" % (k)] = ro.id
 
         if o is None:
-            j = Job(scheduled=dt.datetime.utcnow(), **job)
+            j = Job(active=False, scheduled=dt.datetime.utcnow(), **job)
             print("Inserting: ", job['name'])
             session.add(j)
         else:
