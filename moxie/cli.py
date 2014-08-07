@@ -176,7 +176,7 @@ def load():
         job['scheduled'] = dt.datetime.utcnow()
 
         if o is None:
-            j = Job(active=False, *job)
+            j = Job(active=False, **job)
             print("Inserting: ", job['name'])
             session.add(j)
         else:
