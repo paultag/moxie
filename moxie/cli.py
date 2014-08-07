@@ -99,7 +99,7 @@ def load():
 
     session.commit()
 
-    for env in data['env-sets']:
+    for env in data.pop('env-sets', []):
         name = env.pop('name')
         values = env.pop('values')
         if env != {}:
@@ -123,7 +123,7 @@ def load():
 
     session.commit()
 
-    for volume in data['volume-sets']:
+    for volume in data.pop('volume-sets', []):
         name = volume.pop('name')
         values = volume.pop('values')
         if volume != {}:

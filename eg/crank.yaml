@@ -1,17 +1,20 @@
 ---
 maintainers:
     - name: "Paul Tagliamonte"
-      email: paultag@example.com
+      email: "paultag@example.com"
 
 jobs:
     - name: "crank-hy"
       active: true
       description: "Crank (Hylang)"
-      maintainer_id: 1
+      maintainer: "paultag@example.com"
       interval: 86400
       # interval: 30
       command: "/opt/pault.ag/crank/eg/hylang.hy"
       image: "paultag/crank"
-      volumes:
-          - host: "/srv/leliel.pault.ag/dev/crank/"
-            container: "/crank/"
+
+volume-sets:
+    - name: "crank"
+      values:
+        - host: "/srv/leliel.pault.ag/dev/crank/"
+          container: "/crank/"
