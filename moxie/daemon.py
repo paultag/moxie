@@ -90,6 +90,9 @@ def create(job):
     env = ["{key}={value}".format(**x) for x in jobenvs]
     volumes = {x.host: x.container for x in volumes}
 
+    print("Pulling the image")
+    yield from docker.pull(job.image)
+
     print("Creating new container")
     container = yield from docker.containers.create(
         {"Cmd": cmd,
