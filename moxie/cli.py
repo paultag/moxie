@@ -47,7 +47,8 @@ def init():
     from moxie.models import Base
     from moxie.core import DATABASE_URL
     engine = create_engine(DATABASE_URL)
-    Base.metadata.drop_all(engine)
+    for table in Base.metadata.tables:
+        engine.execute("DROP TABLE IF EXISTS {} CASCADE;".format(table))
     Base.metadata.create_all(engine)
     import os
     from alembic.config import Config

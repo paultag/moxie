@@ -19,6 +19,20 @@ class Job(Base):
     interval = Column(Interval)
     active = Column(Boolean)
 
+    env_id = Column(Integer, ForeignKey('env_set.id'))
+    volumes = relationship(
+        "EnvSet",
+        foreign_keys=[env_id],
+        backref='jobs'
+    )
+
+    volumes_id = Column(Integer, ForeignKey('volume_set.id'))
+    volumes = relationship(
+        "VolumeSet",
+        foreign_keys=[volumes_id],
+        backref='jobs'
+    )
+
     maintainer_id = Column(Integer, ForeignKey('maintainer.id'))
     maintainer = relationship(
         "Maintainer",
@@ -45,23 +59,33 @@ class Run(Base):
     end_time = Column(DateTime)
 
 
-class JobEnv(Base):
-    __tablename__ = 'job_env'
+class EnvSet(Base):
+    __tablename__ = 'env_set'
     id = Column(Integer, primary_key=True)
 
-    job_id = Column(Integer, ForeignKey('job.id'))
-    job = relationship("Job", foreign_keys=[job_id], backref='env')
+
+class VolumeSet(Base):
+    __tablename__ = 'volume_set'
+    id = Column(Integer, primary_key=True)
+
+
+class Env(Base):
+    __tablename__ = 'env'
+    id = Column(Integer, primary_key=True)
+
+    env_set_id = Column(Integer, ForeignKey('env_set.id'))
+    env_set = relationship("EnvSet", foreign_keys=[env_set_id], backref='values')
 
     key = Column(String(255))
     value = Column(String(255))
 
 
-class JobVolume(Base):
-    __tablename__ = 'job_volume'
+class Volume(Base):
+    __tablename__ = 'volume'
     id = Column(Integer, primary_key=True)
 
-    job_id = Column(Integer, ForeignKey('job.id'))
-    job = relationship("Job", foreign_keys=[job_id], backref='volumes')
+    volume_set_id = Column(Integer, ForeignKey('volume_set.id'))
+    volume_set = relationship("VolumeSet", foreign_keys=[volume_set_id], backref='values')
 
     host = Column(String(255))
     container = Column(String(255))
