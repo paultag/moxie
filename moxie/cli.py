@@ -123,6 +123,32 @@ def load():
 
     session.commit()
 
+    for volume in data['volume-sets']:
+        name = volume.pop('name')
+        values = volume.pop('values')
+        if volume != {}:
+            raise ValueError("Unknown keys: %s" % (", ".join(volume.keys())))
+        o = get_one(VolumeSet, VolumeSet.name == name)
+
+        if o is None:
+            print("Inserting:  Vol: %s" % (name))
+            vol = VolumeSet(name=name)
+            session.add(vol)
+            o = vol
+        else:
+            print("Updating:   Vol: %s" % (name))
+            deleted = session.query(Volume).filter(
+                Volume.volume_set_id == o.id).delete()
+
+            print("  => Deleted %s related vols" % (deleted))
+
+        session.commit()
+
+        for config in values:
+            session.add(Volume(volume_set_id=o.id, **config))
+
+    session.commit()
+
     for job in data['jobs']:
         o = get_one(Job, Job.name == job['name'])
 
