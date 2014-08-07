@@ -41,6 +41,8 @@ class Run(Base):
     job_id = Column(Integer, ForeignKey('job.id'))
     job = relationship("Job", foreign_keys=[job_id], backref='runs')
     log = Column(Text)
+    start_time = Column(DateTime)
+    end_time = Column(DateTime)
 
 
 class JobEnv(Base):
