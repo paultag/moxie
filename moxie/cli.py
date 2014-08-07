@@ -155,10 +155,10 @@ def load():
         interval = job.pop('interval')
         job['interval'] = dt.timedelta(seconds=interval)
 
-        job['maintainer'] = get_one(
+        job['maintainer_id'] = get_one(
             Maintainer,
-            Maintainer.name == job['maintainer']
-        )
+            Maintainer.email == job.pop('maintainer')
+        ).id
 
         for k, v in [('env', EnvSet),
                      ('volumes', VolumeSet)]:

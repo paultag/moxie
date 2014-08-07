@@ -146,7 +146,7 @@ def start(job):
     engine = yield from aiopg.sa.create_engine(DATABASE_URL)
     with (yield from engine) as conn:
         volumes = yield from conn.execute(select([
-            JobVolume.__table__]).where(JobVolume.job_id==job.id))
+            Volume.__table__]).where(Volume.volume_set_id==job.volumes_id))
 
         binds = ["{host}:{container}".format(
             host=x.host, container=x.container) for x in volumes]
