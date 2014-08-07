@@ -1,5 +1,21 @@
+
+url = () -> 
+    loc = window.location
+
+    if loc.protocol == "https:"
+        new_uri = "wss:"
+    else
+        new_uri = "ws:"
+
+    new_uri += "//" + loc.host
+    return new_uri
+
+
+
 $(document).ready () ->
-    ws = new WebSocket("ws://localhost:8888/websocket/stream/" + job + "/")
+    root = url()
+
+    ws = new WebSocket(root + "/websocket/stream/" + job + "/")
     ws.onopen = (e) -> 
         term = new Terminal({
             cols: 80,
@@ -16,7 +32,7 @@ $(document).ready () ->
         ws.onclose = (e) ->
             term.destroy()
 
-    ews = new WebSocket("ws://localhost:8888/websocket/events/")
+    ews = new WebSocket(root + "/websocket/events/")
     ews.onopen = (e) -> 
         ews.onmessage = (data) ->
             console.log(data)

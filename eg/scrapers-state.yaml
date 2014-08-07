@@ -4,11 +4,11 @@ maintainers:
       email: "paultag@example.com"
 
 jobs:
-    - name: "scrapers-state-nh"
-      description: "New Hampshire Scrape"
+    - name: "scrapers-state-il"
+      description: "IL Scrape"
       maintainer: "paultag@example.com"
       interval: 30
-      command: "update nh people --fast"
+      command: "update il --scrape"
       image: "sunlightlabs/scrapers-us-state"
       env: "ocd"
 
