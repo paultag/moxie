@@ -49,6 +49,15 @@ def init():
     engine = create_engine(DATABASE_URL)
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
+    import os
+    from alembic.config import Config
+    from alembic import command
+    alembic_cfg = Config(os.path.join(
+        os.path.abspath(os.path.dirname(__file__)),
+        "..",
+        "alembic.ini"
+    ))
+    command.stamp(alembic_cfg, "head")
 
 
 def load():

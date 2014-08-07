@@ -6,6 +6,7 @@ jinja2
 pyyaml
 websockets
 alembic
+python-dateutil
 -e git+https://github.com/jmoiron/humanize#egg=humanize
 
 # Needed to build the scripts.

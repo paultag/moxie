@@ -9,6 +9,7 @@ from sqlalchemy import update, insert, select
 
 import asyncio
 import datetime as dt
+import dateutil.parser
 
 docker = Docker()
 
@@ -39,6 +40,9 @@ def reap(job):
 
     exit = int(state.get("ExitCode", -1))
 
+    start_time = dateutil.parser.parse(state.get("StartedAt"))
+    end_time = dateutil.parser.parse(state.get("FinishedAt"))
+
     engine = yield from aiopg.sa.create_engine(DATABASE_URL)
     with (yield from engine) as conn:
         yield from conn.execute(
@@ -55,6 +59,8 @@ def reap(job):
                 failed=True if exit != 0 else False,
                 job_id=job.id,
                 log=log,
+                start_time=start_time,
+                end_time=end_time,
             ))
 
     yield from container.delete()
