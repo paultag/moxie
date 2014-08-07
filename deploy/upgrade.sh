@@ -17,9 +17,9 @@ docker build --rm -t paultag/moxie .
 sudo service moxie stop
 sudo service moxied stop
 
+moxierun alembic -x sqlalchemy.url=${DATABASE_URL} upgrade head
 docker rm moxie
 docker rm moxied
-moxierun alembic -x sqlalchemy.url=${DATABASE_URL} upgrade head
 
 sudo service moxie start
 sudo service moxied start
