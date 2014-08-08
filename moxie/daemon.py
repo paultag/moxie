@@ -188,36 +188,40 @@ def up(job, conn):
     if container is not None:
         running = container._container.get("State", {}).get("Running", False)
 
-    if active:
-        if running is False:
-            print("Active and not running. Reaping")
-            yield from reap(job, conn)
-        elif running is None:
-            print("No container made, but it's marked as active. Fail")
-            yield from start(job, conn)
-        else:
-            print("Active and running. Waiting.")
-            yield from wait(job, conn)
-
-    # OK. Now we're sure the container is not on and reaped.
-    yield from init(job, conn)
     engine = yield from aiopg.sa.create_engine(DATABASE_URL)
-    while True:
-        jobs = yield from conn.execute(select(
-            [Job.__table__]).where(Job.name == job.name)
-        )
-        job = yield from jobs.first()
+    with (yield from engine) as conn:
+        res = yield from conn.execute(Job.__table__.select())
 
-        delta = (dt.datetime.utcnow() - job.scheduled)
-        seconds = -delta.total_seconds()
-        seconds = 0 if seconds < 0 else seconds
+        if active:
+            if running is False:
+                print("Active and not running. Reaping")
+                yield from reap(job, conn)
+            elif running is None:
+                print("No container made, but it's marked as active. Fail")
+                yield from start(job, conn)
+            else:
+                print("Active and running. Waiting.")
+                yield from wait(job, conn)
 
-        print("[{}] => sleeping for {}".format(
-            job.name,
-            seconds
-        ))
-        yield from asyncio.sleep(seconds)
-        yield from start(job, conn)
+        # OK. Now we're sure the container is not on and reaped.
+        yield from init(job, conn)
+        engine = yield from aiopg.sa.create_engine(DATABASE_URL)
+        while True:
+            jobs = yield from conn.execute(select(
+                [Job.__table__]).where(Job.name == job.name)
+            )
+            job = yield from jobs.first()
+
+            delta = (dt.datetime.utcnow() - job.scheduled)
+            seconds = -delta.total_seconds()
+            seconds = 0 if seconds < 0 else seconds
+
+            print("[{}] => sleeping for {}".format(
+                job.name,
+                seconds
+            ))
+            yield from asyncio.sleep(seconds)
+            yield from start(job, conn)
 
 
 @asyncio.coroutine
@@ -229,8 +233,9 @@ def main():
         engine = yield from aiopg.sa.create_engine(DATABASE_URL)
         with (yield from engine) as conn:
             res = yield from conn.execute(Job.__table__.select())
-            jobs = [asyncio.async(up(x, conn)) for x in res]
-            yield from asyncio.gather(*jobs)
+
+        jobs = [asyncio.async(up(x)) for x in res]
+        yield from asyncio.gather(*jobs)
 
 
 def run():
