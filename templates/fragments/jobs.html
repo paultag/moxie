@@ -8,7 +8,7 @@
       </thead>
       <tbody>
 {% for job in jobs %}
-        <tr>
+        <tr {% if job.active %}class="success"{% else %}{% endif %} >
           <td><a href="/job/{{job.name}}/" >{{job.name}}</a></td>
           <td>{{job.description}}</td>
         </tr>
