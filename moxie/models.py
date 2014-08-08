@@ -20,7 +20,7 @@ class Job(Base):
     active = Column(Boolean)
 
     env_id = Column(Integer, ForeignKey('env_set.id'))
-    volumes = relationship(
+    env = relationship(
         "EnvSet",
         foreign_keys=[env_id],
         backref='jobs'
@@ -30,6 +30,13 @@ class Job(Base):
     volumes = relationship(
         "VolumeSet",
         foreign_keys=[volumes_id],
+        backref='jobs'
+    )
+
+    link_id = Column(Integer, ForeignKey('link_set.id'))
+    links = relationship(
+        "LinkSet",
+        foreign_keys=[link_id],
         backref='jobs'
     )
 
