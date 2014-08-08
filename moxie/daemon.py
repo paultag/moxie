@@ -167,7 +167,7 @@ def start(job, conn):
 
 
 @asyncio.coroutine
-def up(job, conn):
+def up(job):
     """
     Establish state. Enter state at the right point. Handle failure
     gracefully. Write new state back to DB.
