@@ -24,7 +24,7 @@ def getc(job):
 
 
 @asyncio.coroutine
-def reap(job):
+def reap(job, conn):
     """
     Clean up the container, write the log out, save the status.
     """
@@ -43,25 +43,23 @@ def reap(job):
     start_time = dateutil.parser.parse(state.get("StartedAt"))
     end_time = dateutil.parser.parse(state.get("FinishedAt"))
 
-    engine = yield from aiopg.sa.create_engine(DATABASE_URL)
-    with (yield from engine) as conn:
-        yield from conn.execute(
-            update(
-                Job.__table__
-            ).where(
-                Job.name==job.name
-            ).values(
-                active=False,
-            ))
+    yield from conn.execute(
+        update(
+            Job.__table__
+        ).where(
+            Job.name==job.name
+        ).values(
+            active=False,
+        ))
 
-        runid = yield from conn.scalar(insert(
-            Run.__table__).values(
-                failed=True if exit != 0 else False,
-                job_id=job.id,
-                log=log,
-                start_time=start_time,
-                end_time=end_time,
-            ))
+    runid = yield from conn.scalar(insert(
+        Run.__table__).values(
+            failed=True if exit != 0 else False,
+            job_id=job.id,
+            log=log,
+            start_time=start_time,
+            end_time=end_time,
+        ))
 
     yield from container.delete()
     # XXX: In the future, use the log purge API endpoint.
@@ -69,15 +67,15 @@ def reap(job):
 
 
 @asyncio.coroutine
-def wait(job):
+def wait(job, conn):
     """ Wait for a container to stop. """
     container = yield from getc(job)
     yield from container.wait()
-    yield from reap(job)
+    yield from reap(job, conn)
 
 
 @asyncio.coroutine
-def create(job):
+def create(job, conn):
     container = yield from getc(job)
 
     if container is not None:
@@ -85,13 +83,11 @@ def create(job):
 
     cmd = shlex.split(job.command)
 
-    engine = yield from aiopg.sa.create_engine(DATABASE_URL)
-    with (yield from engine) as conn:
-        jobenvs = yield from conn.execute(select([
-            Env.__table__]).where(Env.env_set_id==job.env_id))
+    jobenvs = yield from conn.execute(select([
+        Env.__table__]).where(Env.env_set_id==job.env_id))
 
-        volumes = yield from conn.execute(select([
-            Volume.__table__]).where(Volume.volume_set_id==job.volumes_id))
+    volumes = yield from conn.execute(select([
+        Volume.__table__]).where(Volume.volume_set_id==job.volumes_id))
 
     env = ["{key}={value}".format(**x) for x in jobenvs]
     volumes = {x.host: x.container for x in volumes}
@@ -117,7 +113,7 @@ def create(job):
 
 
 @asyncio.coroutine
-def init(job):
+def init(job, conn):
     container = yield from getc(job)
     cmd = shlex.split(job.command)
 
@@ -132,24 +128,22 @@ def init(job):
             container = None
 
     if container is None:
-        yield from create(job)
+        yield from create(job, conn)
 
     return container
 
 
-def start(job):
+def start(job, conn):
     print("Starting: {}".format(job.name))
     container = yield from getc(job)
     if container is None:
-        container = yield from create(job)
+        container = yield from create(job, conn)
 
-    engine = yield from aiopg.sa.create_engine(DATABASE_URL)
-    with (yield from engine) as conn:
-        volumes = yield from conn.execute(select([
-            Volume.__table__]).where(Volume.volume_set_id==job.volumes_id))
+    volumes = yield from conn.execute(select([
+        Volume.__table__]).where(Volume.volume_set_id==job.volumes_id))
 
-        binds = ["{host}:{container}".format(
-            host=x.host, container=x.container) for x in volumes]
+    binds = ["{host}:{container}".format(
+        host=x.host, container=x.container) for x in volumes]
 
     yield from container.start({
         "Binds": binds,
@@ -158,23 +152,22 @@ def start(job):
         "Links": [],
     })
 
-    with (yield from engine) as conn:
-        reschedule = (dt.datetime.utcnow() + job.interval)
-        yield from conn.execute(
-            update(
-                Job.__table__
-            ).where(
-                Job.name==job.name
-            ).values(
-                active=True,
-                scheduled=reschedule,
-            ))
+    reschedule = (dt.datetime.utcnow() + job.interval)
+    yield from conn.execute(
+        update(
+            Job.__table__
+        ).where(
+            Job.name==job.name
+        ).values(
+            active=True,
+            scheduled=reschedule,
+        ))
 
-    yield from wait(job)
+    yield from wait(job, conn)
 
 
 @asyncio.coroutine
-def up(job):
+def up(job, conn):
     """
     Establish state. Enter state at the right point. Handle failure
     gracefully. Write new state back to DB.
@@ -198,23 +191,22 @@ def up(job):
     if active:
         if running is False:
             print("Active and not running. Reaping")
-            yield from reap(job)
+            yield from reap(job, conn)
         elif running is None:
             print("No container made, but it's marked as active. Fail")
-            yield from start(job)
+            yield from start(job, conn)
         else:
             print("Active and running. Waiting.")
-            yield from wait(job)
+            yield from wait(job, conn)
 
     # OK. Now we're sure the container is not on and reaped.
-    yield from init(job)
+    yield from init(job, conn)
     engine = yield from aiopg.sa.create_engine(DATABASE_URL)
     while True:
-        with (yield from engine) as conn:
-            jobs = yield from conn.execute(select(
-                [Job.__table__]).where(Job.name == job.name)
-            )
-            job = yield from jobs.first()
+        jobs = yield from conn.execute(select(
+            [Job.__table__]).where(Job.name == job.name)
+        )
+        job = yield from jobs.first()
 
         delta = (dt.datetime.utcnow() - job.scheduled)
         seconds = -delta.total_seconds()
@@ -225,7 +217,7 @@ def up(job):
             seconds
         ))
         yield from asyncio.sleep(seconds)
-        yield from start(job)
+        yield from start(job, conn)
 
 
 @asyncio.coroutine
@@ -233,11 +225,12 @@ def main():
     """
     Start an `up` coroutine for each job.
     """
-    engine = yield from aiopg.sa.create_engine(DATABASE_URL)
-    with (yield from engine) as conn:
-        res = yield from conn.execute(Job.__table__.select())
-        jobs = [asyncio.async(up(x)) for x in res]
-        yield from asyncio.gather(*jobs)
+    while True:
+        engine = yield from aiopg.sa.create_engine(DATABASE_URL)
+        with (yield from engine) as conn:
+            res = yield from conn.execute(Job.__table__.select())
+            jobs = [asyncio.async(up(x, conn)) for x in res]
+            yield from asyncio.gather(*jobs)
 
 
 def run():
