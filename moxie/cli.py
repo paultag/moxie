@@ -39,6 +39,7 @@ def serve():
         print("Opening socket: %s" % (socket_fp))
         server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         server.bind(socket_fp)
+        os.chmod(socket_fp, 766)
         coro = loop.create_server(app, sock=server)
     else:
         host = os.environ.get("MOXIE_HOST", "127.0.0.1")
