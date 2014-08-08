@@ -1,5 +1,5 @@
 from moxie.core import DATABASE_URL
-from moxie.models import Job, Run, Env, Volume
+from moxie.models import Job, Run, Env, Volume, Link
 from aiodocker.docker import Docker
 
 import shlex
@@ -146,11 +146,16 @@ def start(job, conn):
     binds = ["{host}:{container}".format(
         host=x.host, container=x.container) for x in volumes]
 
+    links = yield from conn.execute(select([
+        Link.__table__]).where(Link.link_set_id==job.link_id))
+
+    links = ["{remote}:{alias}".format(**x) for x in links]
+
     yield from container.start({
         "Binds": binds,
         "Privileged": False,
         "PortBindings": [],
-        "Links": [],
+        "Links": links,
     })
 
     reschedule = (dt.datetime.utcnow() + job.interval)

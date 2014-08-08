@@ -205,7 +205,7 @@ def load():
 
         for k, v in [('env', EnvSet),
                      ('volumes', VolumeSet),
-                     ('links', LinkSet)]:
+                     ('link', LinkSet)]:
             if k not in job:
                 continue
 

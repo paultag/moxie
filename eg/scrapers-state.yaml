@@ -11,7 +11,7 @@ jobs:
       command: "update il --scrape"
       image: "sunlightlabs/scrapers-us-state"
       env: "ocd"
-      links: "ocd"
+      link: "ocd"
 
 env-sets:
     - name: "ocd"
