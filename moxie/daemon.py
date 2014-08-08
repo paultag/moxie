@@ -93,23 +93,32 @@ def create(job, conn):
     volumes = {x.host: x.container for x in volumes}
 
     print("Pulling the image")
-    yield from docker.pull(job.image)
+    try:
+        yield from docker.pull(job.image)
+    except ValueError:
+        print("Pull failure for {}: {}".format(job['name'], e))
+        return None
 
     print("Creating new container")
     # XXX: USE LINKS HERE
-    container = yield from docker.containers.create(
-        {"Cmd": cmd,
-         "Image": job.image,
-         "Env": env,
-         "AttachStdin": True,
-         "AttachStdout": True,
-         "AttachStderr": True,
-         "ExposedPorts": [],
-         "Volumes": volumes,
-         "Tty": True,
-         "OpenStdin": False,
-         "StdinOnce": False},
-        name=job.name)
+    try:
+        container = yield from docker.containers.create(
+            {"Cmd": cmd,
+             "Image": job.image,
+             "Env": env,
+             "AttachStdin": True,
+             "AttachStdout": True,
+             "AttachStderr": True,
+             "ExposedPorts": [],
+             "Volumes": volumes,
+             "Tty": True,
+             "OpenStdin": False,
+             "StdinOnce": False},
+            name=job.name)
+    except ValueError as e:
+        print("Creation failure for {}: {}".format(job['name'], e))
+        return
+
     return container
 
 
@@ -129,7 +138,11 @@ def init(job, conn):
             container = None
 
     if container is None:
-        yield from create(job, conn)
+        c = yield from create(job, conn)
+        if c is None:
+            print("Uch, container {} couldn't be created.".format(job['name']))
+            return
+        container = c
 
     return container
 
@@ -203,13 +216,26 @@ def up(job, engine):
                 yield from reap(job, conn)
             elif running is None:
                 print("No container made, but it's marked as active. Fail")
-                yield from start(job, conn)
+                try:
+                    yield from start(job, conn)
+                except ValueError as e:
+                    print("Crap! Can't get it started. {} {}".format(
+                        job['name'],
+                        e
+                    ))
             else:
                 print("Active and running. Waiting.")
                 yield from wait(job, conn)
 
         # OK. Now we're sure the container is not on and reaped.
-        yield from init(job, conn)
+        c = yield from init(job, conn)
+        if c is None:
+            # XXX: Write this to the DB!!
+            print("Container failed to init. Aboring job {}.".format(
+                job['name']
+            ))
+            return
+
         while True:
             jobs = yield from conn.execute(select(
                 [Job.__table__]).where(Job.name == job.name)
@@ -225,7 +251,14 @@ def up(job, engine):
                 seconds
             ))
             yield from asyncio.sleep(seconds)
-            yield from start(job, conn)
+            try:
+                yield from start(job, conn)
+            except ValueError as e:
+                print("Can't start {}: {}. Aborting.".format(
+                    job['name'],
+                    e,
+                ))
+                return
 
 
 @asyncio.coroutine
