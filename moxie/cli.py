@@ -26,6 +26,7 @@ def serve():
 
     import socket
     import os.path
+    import sys
     import os
 
     loop = asyncio.get_event_loop()
@@ -46,6 +47,7 @@ def serve():
 
     server = loop.run_until_complete(coro)
     print('serving on {}'.format(server.sockets[0].getsockname()))
+    sys.stdout.flush()
     try:
         loop.run_forever()
     except KeyboardInterrupt:
