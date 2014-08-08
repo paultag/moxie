@@ -168,7 +168,7 @@ def start(job, conn):
 
 
 @asyncio.coroutine
-def up(job):
+def up(job, engine):
     """
     Establish state. Enter state at the right point. Handle failure
     gracefully. Write new state back to DB.
@@ -189,7 +189,6 @@ def up(job):
     if container is not None:
         running = container._container.get("State", {}).get("Running", False)
 
-    engine = yield from aiopg.sa.create_engine(DATABASE_URL)
     with (yield from engine) as conn:
         res = yield from conn.execute(Job.__table__.select())
 
@@ -206,7 +205,6 @@ def up(job):
 
         # OK. Now we're sure the container is not on and reaped.
         yield from init(job, conn)
-        engine = yield from aiopg.sa.create_engine(DATABASE_URL)
         while True:
             jobs = yield from conn.execute(select(
                 [Job.__table__]).where(Job.name == job.name)
@@ -231,11 +229,11 @@ def main():
     Start an `up` coroutine for each job.
     """
     while True:
-        engine = yield from aiopg.sa.create_engine(DATABASE_URL)
+        engine = yield from aiopg.sa.create_engine(DATABASE_URL, maxsize=10)
         with (yield from engine) as conn:
             res = yield from conn.execute(Job.__table__.select())
 
-        jobs = [asyncio.async(up(x)) for x in res]
+        jobs = [asyncio.async(up(x, engine)) for x in res]
         yield from asyncio.gather(*jobs)
 
 
