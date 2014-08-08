@@ -4,6 +4,7 @@ source /etc/docker/moxie.sh
 
 function moxierun {
     docker run --rm -it \
+        --link postgres:postgres \
         -v /srv/lucifer.pault.ag/prod/moxie:/moxie \
         -e DATABASE_URL=${DATABASE_URL} \
         paultag/moxie \

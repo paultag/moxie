@@ -10,6 +10,7 @@ ExecStart=/bin/bash -c '/usr/bin/docker start -a moxied || \
     /usr/bin/docker run \
         --name moxied \
         --privileged=true \
+        --link postgres:postgres \
         -v /run/docker.sock:/run/docker.sock \
         -e DATABASE_URL=${DATABASE_URL} \
         paultag/moxie \

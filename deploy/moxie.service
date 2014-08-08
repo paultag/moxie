@@ -10,6 +10,7 @@ ExecStart=/bin/bash -c '/usr/bin/docker start -a moxie || \
     /usr/bin/docker run \
         --name moxie \
         --privileged=true \
+        --link postgres:postgres \
         -v /run/docker.sock:/run/docker.sock \
         -v /srv/lucifer.pault.ag/prod/moxie:/moxie \
         -v /srv/lucifer.pault.ag/prod/nginx/serve/sockets:/sockets \

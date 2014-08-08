@@ -3,6 +3,7 @@ source /etc/docker/moxie.sh
 
 docker run --rm -it \
     --privileged=true \
+    --link postgres:postgres \
     -v /run/docker.sock:/run/docker.sock \
     -v /srv/lucifer.pault.ag/prod/moxie:/moxie \
     -e DATABASE_URL=${DATABASE_URL} \
