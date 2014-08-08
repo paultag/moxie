@@ -19,7 +19,6 @@ sudo service moxie stop
 sudo service moxied stop
 
 moxierun alembic -x sqlalchemy.url=${DATABASE_URL} upgrade head
-moxierun moxie-load /moxie/*
 
 docker rm moxie
 docker rm moxied
