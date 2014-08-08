@@ -100,131 +100,132 @@ def load():
     def get_one(table, *constraints):
         return session.query(table).filter(*constraints).first()
 
-    data = yaml.load(open(sys.argv[1], 'r'))
+    for fp in sys.argv[1:]:
+        data = yaml.load(open(fp, 'r'))
 
-    for maintainer in data['maintainers']:
-        o = get_one(Maintainer, Maintainer.name == maintainer['name'])
+        for maintainer in data['maintainers']:
+            o = get_one(Maintainer, Maintainer.name == maintainer['name'])
 
-        if o is None:
-            m = Maintainer(**maintainer)
-            print("Inserting: ", maintainer['name'])
-            session.add(m)
-        else:
-            session.add(_update(o, maintainer))
-            print("Updating:  ", maintainer['name'])
-
-    session.commit()
-
-    for env in data.pop('env-sets', []):
-        name = env.pop('name')
-        values = env.pop('values')
-        if env != {}:
-            raise ValueError("Unknown keys: %s" % (", ".join(env.keys())))
-        o = get_one(EnvSet, EnvSet.name == name)
-
-        if o is None:
-            print("Inserting:  Env: %s" % (name))
-            env = EnvSet(name=name)
-            session.add(env)
-            o = env
-        else:
-            print("Updating:   Env: %s" % (name))
-            deleted = session.query(Env).filter(Env.env_set_id == o.id).delete()
-            print("  => Deleted %s related envs" % (deleted))
+            if o is None:
+                m = Maintainer(**maintainer)
+                print("Inserting: ", maintainer['name'])
+                session.add(m)
+            else:
+                session.add(_update(o, maintainer))
+                print("Updating:  ", maintainer['name'])
 
         session.commit()
 
-        for k, v in values.items():
-            session.add(Env(env_set_id=o.id, key=k, value=v))
+        for env in data.pop('env-sets', []):
+            name = env.pop('name')
+            values = env.pop('values')
+            if env != {}:
+                raise ValueError("Unknown keys: %s" % (", ".join(env.keys())))
+            o = get_one(EnvSet, EnvSet.name == name)
 
-    session.commit()
+            if o is None:
+                print("Inserting:  Env: %s" % (name))
+                env = EnvSet(name=name)
+                session.add(env)
+                o = env
+            else:
+                print("Updating:   Env: %s" % (name))
+                deleted = session.query(Env).filter(Env.env_set_id == o.id).delete()
+                print("  => Deleted %s related envs" % (deleted))
 
-    for volume in data.pop('volume-sets', []):
-        name = volume.pop('name')
-        values = volume.pop('values')
-        if volume != {}:
-            raise ValueError("Unknown keys: %s" % (", ".join(volume.keys())))
-        o = get_one(VolumeSet, VolumeSet.name == name)
+            session.commit()
 
-        if o is None:
-            print("Inserting:  Vol: %s" % (name))
-            vol = VolumeSet(name=name)
-            session.add(vol)
-            o = vol
-        else:
-            print("Updating:   Vol: %s" % (name))
-            deleted = session.query(Volume).filter(
-                Volume.volume_set_id == o.id).delete()
-
-            print("  => Deleted %s related vols" % (deleted))
+            for k, v in values.items():
+                session.add(Env(env_set_id=o.id, key=k, value=v))
 
         session.commit()
 
-        for config in values:
-            session.add(Volume(volume_set_id=o.id, **config))
+        for volume in data.pop('volume-sets', []):
+            name = volume.pop('name')
+            values = volume.pop('values')
+            if volume != {}:
+                raise ValueError("Unknown keys: %s" % (", ".join(volume.keys())))
+            o = get_one(VolumeSet, VolumeSet.name == name)
 
-    session.commit()
+            if o is None:
+                print("Inserting:  Vol: %s" % (name))
+                vol = VolumeSet(name=name)
+                session.add(vol)
+                o = vol
+            else:
+                print("Updating:   Vol: %s" % (name))
+                deleted = session.query(Volume).filter(
+                    Volume.volume_set_id == o.id).delete()
 
-    for link in data.pop('link-sets', []):
-        name = link.pop('name')
-        links = link.pop('links')
+                print("  => Deleted %s related vols" % (deleted))
 
-        if link != {}:
-            raise ValueError("Unknown keys: %s" % (", ".join(link.keys())))
-        o = get_one(LinkSet, LinkSet.name == name)
+            session.commit()
 
-        if o is None:
-            print("Inserting:  Lnk: %s" % (name))
-            lnk = LinkSet(name=name)
-            session.add(lnk)
-            o = lnk
-        else:
-            print("Updating:   Lnk: %s" % (name))
-            deleted = session.query(Link).filter(
-                Link.link_set_id == o.id).delete()
-
-            print("  => Deleted %s related links" % (deleted))
+            for config in values:
+                session.add(Volume(volume_set_id=o.id, **config))
 
         session.commit()
 
-        for config in links:
-            session.add(Link(link_set_id=o.id, **config))
+        for link in data.pop('link-sets', []):
+            name = link.pop('name')
+            links = link.pop('links')
 
-    session.commit()
+            if link != {}:
+                raise ValueError("Unknown keys: %s" % (", ".join(link.keys())))
+            o = get_one(LinkSet, LinkSet.name == name)
 
-    for job in data['jobs']:
-        o = get_one(Job, Job.name == job['name'])
+            if o is None:
+                print("Inserting:  Lnk: %s" % (name))
+                lnk = LinkSet(name=name)
+                session.add(lnk)
+                o = lnk
+            else:
+                print("Updating:   Lnk: %s" % (name))
+                deleted = session.query(Link).filter(
+                    Link.link_set_id == o.id).delete()
 
-        interval = job.pop('interval')
-        job['interval'] = dt.timedelta(seconds=interval)
+                print("  => Deleted %s related links" % (deleted))
 
-        job['maintainer_id'] = get_one(
-            Maintainer,
-            Maintainer.email == job.pop('maintainer')
-        ).id
+            session.commit()
 
-        for k, v in [('env', EnvSet),
-                     ('volumes', VolumeSet),
-                     ('link', LinkSet)]:
-            if k not in job:
-                continue
+            for config in links:
+                session.add(Link(link_set_id=o.id, **config))
 
-            name = job.pop(k)
+        session.commit()
 
-            ro = get_one(v, v.name == name)
-            if ro is None:
-                raise ValueError("Error: No such %s: %s" % (k, name))
+        for job in data['jobs']:
+            o = get_one(Job, Job.name == job['name'])
 
-            job["%s_id" % (k)] = ro.id
+            interval = job.pop('interval')
+            job['interval'] = dt.timedelta(seconds=interval)
 
-        job['scheduled'] = dt.datetime.utcnow()
+            job['maintainer_id'] = get_one(
+                Maintainer,
+                Maintainer.email == job.pop('maintainer')
+            ).id
 
-        if o is None:
-            j = Job(active=False, **job)
-            print("Inserting: ", job['name'])
-            session.add(j)
-        else:
-            print("Updating:  ", job['name'])
-            session.add(_update(o, job))
+            for k, v in [('env', EnvSet),
+                         ('volumes', VolumeSet),
+                         ('link', LinkSet)]:
+                if k not in job:
+                    continue
 
-    session.commit()
+                name = job.pop(k)
+
+                ro = get_one(v, v.name == name)
+                if ro is None:
+                    raise ValueError("Error: No such %s: %s" % (k, name))
+
+                job["%s_id" % (k)] = ro.id
+
+            job['scheduled'] = dt.datetime.utcnow()
+
+            if o is None:
+                j = Job(active=False, **job)
+                print("Inserting: ", job['name'])
+                session.add(j)
+            else:
+                print("Updating:  ", job['name'])
+                session.add(_update(o, job))
+
+        session.commit()
