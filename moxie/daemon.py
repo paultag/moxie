@@ -254,11 +254,11 @@ def up(job, engine):
             try:
                 yield from start(job, conn)
             except ValueError as e:
-                print("Can't start {}: {}. Aborting.".format(
+                print("Can't start {}: {}. Waiting 1000 seconds.".format(
                     job['name'],
                     e,
                 ))
-                return
+                yield from asyncio.sleep(1000)
 
 
 @asyncio.coroutine
