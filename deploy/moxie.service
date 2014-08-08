@@ -12,9 +12,9 @@ ExecStart=/bin/bash -c '/usr/bin/docker start -a moxie || \
         --privileged=true \
         -v /run/docker.sock:/run/docker.sock \
         -v /srv/lucifer.pault.ag/prod/moxie:/moxie \
+        -v /srv/lucifer.pault.ag/prod/nginx/serve/sockets:/sockets \
         -e DATABASE_URL=${DATABASE_URL} \
-        -e MOXIE_HOST=${MOXIE_HOST} \
-        -e MOXIE_PORT=${MOXIE_PORT} \
+        -e MOXIE_SOCKET=${MOXIE_SOCKET} \
         paultag/moxie \
         moxie-serve'
 ExecStop=/usr/bin/docker stop -t 5 moxie
