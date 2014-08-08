@@ -96,6 +96,7 @@ def create(job, conn):
     yield from docker.pull(job.image)
 
     print("Creating new container")
+    # XXX: USE LINKS HERE
     container = yield from docker.containers.create(
         {"Cmd": cmd,
          "Image": job.image,
