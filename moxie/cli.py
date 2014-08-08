@@ -89,8 +89,8 @@ def load():
     from sqlalchemy import create_engine
     from sqlalchemy.orm import sessionmaker
     from moxie.models import (Base, Job, Maintainer,
-                              EnvSet, VolumeSet,
-                              Env, Volume)
+                              EnvSet, VolumeSet, LinkSet,
+                              Env, Volume, Link)
     from moxie.core import DATABASE_URL
 
     engine = create_engine(DATABASE_URL)
@@ -162,6 +162,33 @@ def load():
 
         for config in values:
             session.add(Volume(volume_set_id=o.id, **config))
+
+    session.commit()
+
+    for link in data.pop('link-sets', []):
+        name = link.pop('name')
+        links = link.pop('links')
+
+        if link != {}:
+            raise ValueError("Unknown keys: %s" % (", ".join(link.keys())))
+        o = get_one(LinkSet, LinkSet.name == name)
+
+        if o is None:
+            print("Inserting:  Lnk: %s" % (name))
+            lnk = LinkSet(name=name)
+            session.add(lnk)
+            o = lnk
+        else:
+            print("Updating:   Lnk: %s" % (name))
+            deleted = session.query(Link).filter(
+                Link.link_set_id == o.id).delete()
+
+            print("  => Deleted %s related links" % (deleted))
+
+        session.commit()
+
+        for config in links:
+            session.add(Link(link_set_id=o.id, **config))
 
     session.commit()
 

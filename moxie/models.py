@@ -59,6 +59,23 @@ class Run(Base):
     end_time = Column(DateTime)
 
 
+class LinkSet(Base):
+    __tablename__ = 'link_set'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(255), unique=True)
+
+
+class Link(Base):
+    __tablename__ = 'link'
+    id = Column(Integer, primary_key=True)
+
+    link_set_id = Column(Integer, ForeignKey('link_set.id'))
+    link_set = relationship("LinkSet", foreign_keys=[link_set_id], backref='links')
+
+    remote = Column(String(255))
+    alias = Column(String(255))
+
+
 class EnvSet(Base):
     __tablename__ = 'env_set'
     id = Column(Integer, primary_key=True)
