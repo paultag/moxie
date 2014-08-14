@@ -186,7 +186,7 @@ def start(job, conn):
 
 
 @asyncio.coroutine
-def up(job, engine):
+def up(job, engine, stall_range):
     """
     Establish state. Enter state at the right point. Handle failure
     gracefully. Write new state back to DB.
@@ -201,7 +201,7 @@ def up(job, engine):
     running = None
 
     print("Entering: {}".format(job.name))
-    yield from asyncio.sleep(random.randint(1, 10))
+    yield from asyncio.sleep(random.randint(1, stall_range))
 
     container = yield from getc(job)
     if container is not None:
@@ -270,8 +270,12 @@ def main():
         engine = yield from aiopg.sa.create_engine(DATABASE_URL, maxsize=10)
         with (yield from engine) as conn:
             res = yield from conn.execute(Job.__table__.select())
+            count = yield from conn.scalar(Job.__table__.count())
 
-        jobs = [asyncio.async(up(x, engine)) for x in res]
+        print("Running: %s job(s)" % (count))
+        stall_range = (count * 20)
+
+        jobs = [asyncio.async(up(x, engine, stall_range)) for x in res]
         yield from asyncio.gather(*jobs)
 
 
