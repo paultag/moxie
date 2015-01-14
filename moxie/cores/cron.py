@@ -2,7 +2,6 @@ import asyncio
 from aiocore import Service
 
 
-
 class CronService(Service):
     identifier = "moxie.cores.cron.CronService"
 

@@ -2,7 +2,6 @@ import asyncio
 from aiocore import EventService
 
 
-
 class LogService(EventService):
     identifier = "moxie.cores.log.LogService"
 

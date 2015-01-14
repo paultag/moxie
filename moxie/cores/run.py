@@ -2,7 +2,6 @@ import asyncio
 from aiocore import EventService
 
 
-
 class RunService(EventService):
     identifier = "moxie.cores.run.RunService"
 
