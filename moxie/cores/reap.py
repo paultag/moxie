@@ -8,7 +8,7 @@ class ReapService(EventService):
 
     @asyncio.coroutine
     def reap(self, job):
-        # yield from self.logger.log("reap", "Reaping job `%s`" % (job.name))
+        yield from self.logger.log("reap", "Reaping job `%s`" % (job.name))
         try:
             container = (yield from self.containers.get(job.name))
         except ValueError:

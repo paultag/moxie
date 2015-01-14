@@ -112,3 +112,6 @@ class RunService(EventService):
         self.logger = EventService.resolve("moxie.cores.log.LogService")
         yield from self.logger.log("run", "Running Job: `%s`" % (job.name))
         yield from self._bringup(job)
+        yield from self.logger.log("run", "Job `%s` bringup complete" % (
+            job.name
+        ))
