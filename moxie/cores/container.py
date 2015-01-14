@@ -12,6 +12,15 @@ class ContainerService(Service):
         self._containers = weakref.WeakValueDictionary()
         self._docker = Docker()
 
+
+    @asyncio.coroutine
+    def pull(self, name):
+        return (yield from self._docker.pull(name))
+
+    @asyncio.coroutine
+    def create(self, config, **kwargs):
+        return (yield from self._docker.containers.create(config, **kwargs))
+
     @asyncio.coroutine
     def get(self, name):
         if name in self._containers:
