@@ -1,15 +1,38 @@
 import asyncio
+import datetime as dt
 from aiocore import Service
+from moxie.models import Job
 
 
 class CronService(Service):
     identifier = "moxie.cores.cron.CronService"
+    HEARTBEAT = 5
+
+    @asyncio.coroutine
+    def handle(self, job):
+        delta = (dt.datetime.utcnow() - job.scheduled)
+        seconds = -delta.total_seconds()
+        seconds = 0 if seconds < 0 else seconds
+        yield from self.logger.log(
+            "cron", "Job: %s -- Sleeping for `%s` seconds" % (
+                job.name, seconds))
+        yield from asyncio.sleep(seconds)
+        yield from self.run.run(job)
 
     @asyncio.coroutine
     def __call__(self):
-        logger = CronService.resolve("moxie.cores.log.LogService")
-        return
+        self.logger = CronService.resolve("moxie.cores.log.LogService")
+        self.run = CronService.resolve("moxie.cores.run.RunService")
+        self.database = CronService.resolve("moxie.cores.database.DatabaseService")
 
         while True:
-            yield from logger.log("cron", "heartbeat")
-            yield from asyncio.sleep(2)
+            jobs = (yield from self.database.job.list(
+                Job.scheduled <= (
+                    dt.datetime.utcnow() +
+                    dt.timedelta(seconds=self.HEARTBEAT))
+            ))  # Get all jobs that we need to handle during this heartbeat
+
+            for job in jobs:
+                asyncio.async(self.handle(job))
+
+            yield from asyncio.sleep(self.HEARTBEAT)

@@ -43,12 +43,17 @@ class DatabaseService(Service):
 
         @guard
         @asyncio.coroutine
-        def list(self):
+        def list(self, where=None):
             """
             Get all known jobs
             """
+            if where is None:
+                q = Job.__table__.select()
+            else:
+                q = select([Job.__table__]).where(where)
+
             with (yield from self.db.engine) as conn:
-                jobs = (yield from conn.execute(Job.__table__.select()))
+                jobs = (yield from conn.execute(q))
             return jobs
 
         @guard
