@@ -2,14 +2,19 @@
 def serve():
     import asyncio
 
-    from moxie.cores import RunService, LogService, CronService
+    from moxie.cores import (RunService, LogService, CronService, ReapService,
+                             DatabaseService, ContainerService)
 
     run = RunService()
     log = LogService()
     cron = CronService()
+    reap = ReapService()
+    db = DatabaseService()
+    container = ContainerService()
 
     loop = asyncio.get_event_loop()
-    server = loop.run_until_complete(asyncio.gather(run(), log(), cron()))
+    server = loop.run_until_complete(asyncio.gather(
+        run(), log(), cron(), reap(), db(), container()))
 
 
 def init():
