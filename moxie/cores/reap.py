@@ -8,22 +8,21 @@ class ReapService(EventService):
 
     @asyncio.coroutine
     def reap(self, job):
-        yield from self.logger.log("reap", "Reaping job `%s`" % (job.name))
-
+        # yield from self.logger.log("reap", "Reaping job `%s`" % (job.name))
         try:
             container = (yield from self.containers.get(job.name))
         except ValueError:
-            yield from self.logger.log("reap", "job `%s` idle" % (
-                job.name
-            ))
+            # yield from self.logger.log("reap", "job `%s` idle" % (
+            #     job.name
+            # ))
             return
 
         state = container._container.get("State", {})
         running = state.get("Running", False)
         if running:
-            yield from self.logger.log("reap", "job `%s` still active" % (
-                job.name
-            ))
+            # yield from self.logger.log("reap", "job `%s` still active" % (
+            #     job.name
+            # ))
             return  # No worries, we're not done yet!
 
         exit = int(state.get("ExitCode", -1))
@@ -45,7 +44,6 @@ class ReapService(EventService):
             job.name,
             runid
         ))
-
         yield from container.delete()
 
 
