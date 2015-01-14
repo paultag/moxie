@@ -1,5 +1,5 @@
 import asyncio
-from aiocore import Service
+from aiocore import EventService
 
 
 class ReapService(EventService):
