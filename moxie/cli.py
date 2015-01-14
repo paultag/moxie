@@ -1,24 +1,3 @@
-def attach():
-    import asyncio
-    import websockets
-    import sys
-
-    @asyncio.coroutine
-    def hello():
-        server, job = sys.argv[1:]
-        websocket = yield from websockets.connect(
-            'ws://{server}/websocket/stream/{job}/'.format(
-                server=server, job=job))
-
-        while True:
-            msg = yield from websocket.recv()
-            if msg:
-                sys.stdout.write(msg)
-                sys.stdout.flush()
-
-    asyncio.get_event_loop().run_until_complete(hello())
-
-
 
 def serve():
     import asyncio
