@@ -3,9 +3,9 @@ from aiocore import EventService
 
 
 
-class JobService(EventService):
-    identifier = "moxie.cores.run.JobService"
+class RunService(EventService):
+    identifier = "moxie.cores.run.RunService"
 
     @asyncio.coroutine
-    def message(self, message):
+    def handle(self, message):
         pass
