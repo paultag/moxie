@@ -46,6 +46,29 @@ class RunService(EventService):
         return container
 
     @asyncio.coroutine
+    def _start(self, job):
+        container = yield from self._getc(job)
+        if container is None:
+            container = yield from create(job, conn)
+
+        volumes = yield from self.database.volume.get(job.volumes_id)
+        binds = ["{host}:{container}".format(
+            host=x.host, container=x.container) for x in volumes]
+
+        # links = yield from self.database.link(job.volume_id)
+        # links = ["{remote}:{alias}".format(**x) for x in links]
+
+        yield from self.containers.start(job.name, {
+            "Binds": binds,
+            "Privileged": False,
+            "PortBindings": [],
+            "Links": [],
+        })
+
+        yield from self.database.job.reschedule(job.name)
+
+
+    @asyncio.coroutine
     def _create(self, job):
         container = yield from self._getc(job)
 
@@ -123,3 +146,4 @@ class RunService(EventService):
 
             yield from self.logger.log("run", "Running Job: `%s`" % (job.name))
             yield from self._bringup(job)
+            yield from self._start(job)

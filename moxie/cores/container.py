@@ -35,6 +35,11 @@ class ContainerService(Service):
         return (yield from self._docker.containers.create(config, **kwargs))
 
     @asyncio.coroutine
+    def start(self, name, config, **kwargs):
+        obj = yield from self.get(name)
+        return (yield from obj.start(config, **kwargs))
+
+    @asyncio.coroutine
     def get(self, name):
         if name in self._containers:
             obj = self._containers[name]
