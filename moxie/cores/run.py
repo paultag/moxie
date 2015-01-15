@@ -6,6 +6,10 @@ from aiocore import EventService
 class RunService(EventService):
     identifier = "moxie.cores.run.RunService"
 
+    def __init__(self):
+        super(RunService, self).__init__()
+        self.lock = asyncio.Lock()
+
     @asyncio.coroutine
     def _getc(self, job):
         try:
@@ -110,11 +114,12 @@ class RunService(EventService):
             "moxie.cores.database.DatabaseService")
         self.logger = EventService.resolve("moxie.cores.log.LogService")
 
-        try:
-            good = yield from self.database.job.take(job.name)
-        except ValueError:
-            yield from self.logger.log("run", "Job already active. Bailing")
-            return
+        with (yield from self.lock):
+            try:
+                good = yield from self.database.job.take(job.name)
+            except ValueError:
+                yield from self.logger.log("run", "Job already active. Bailing")
+                return
 
-        yield from self.logger.log("run", "Running Job: `%s`" % (job.name))
-        yield from self._bringup(job)
+            yield from self.logger.log("run", "Running Job: `%s`" % (job.name))
+            yield from self._bringup(job)

@@ -12,7 +12,24 @@ class ReapService(EventService):
     def reap(self, job):
         yield from self.logger.log("reap", "Reaping job `%s`" % (job.name))
 
-        container = (yield from self.containers.get(job.name))
+        try:
+            container = (yield from self.containers.get(job.name))
+        except ValueError:
+            yield from self.logger.log("reap", "INTERNAL ERROR - %s" % (
+                job.name
+            ))
+            runid = yield from self.database.run.create(
+                failed=True,
+                job_id=job.id,
+                log="internal error",
+                start_time=dt.datetime.utcnow(),
+                end_time=dt.datetime.utcnow(),
+            )
+            yield from self.database.job.complete(job.name)
+            yield from self.logger.log("reap", "Job punted. - %s" % (
+                job.name
+            ))
+            return  # No worries, we're not done yet!
 
         state = container._container.get("State", {})
         running = state.get("Running", False)
@@ -51,9 +68,11 @@ class ReapService(EventService):
         self.containers = EventService.resolve(
             "moxie.cores.container.ContainerService")
         self.logger = EventService.resolve("moxie.cores.log.LogService")
+        self.run = EventService.resolve("moxie.cores.run.RunService")
 
         while True:
             jobs = (yield from self.database.job.list(Job.active == True))
             for job in jobs:
-                yield from self.reap(job)
+                with (yield from self.run.lock):
+                    yield from self.reap(job)
             yield from asyncio.sleep(5)
