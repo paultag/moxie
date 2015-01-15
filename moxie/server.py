@@ -90,7 +90,7 @@ class MoxieRequest(object):
 class MoxieHandler(aiohttp.server.ServerHttpProtocol):
     ENCODING = 'utf-8'
 
-    def make_response(self, code, content_type=None, *headers):
+    def make_response(self, code, *headers, content_type=None):
         content_type = content_type if content_type else "text/html"
         response = aiohttp.Response(self.writer, code)
         response.add_header('Transfer-Encoding', 'chunked')
