@@ -11,23 +11,8 @@ class ReapService(EventService):
     @asyncio.coroutine
     def reap(self, job):
         yield from self.logger.log("reap", "Reaping job `%s`" % (job.name))
-        try:
-            container = (yield from self.containers.get(job.name))
-        except ValueError as e:
-            # OK, wat. We're here because we're active in the DB, but it's gone.
-            # As a result, let's complete it and add a failed result
-            yield from self.logger.log("reap", "job `%s` INTERNAL FAILURE" % (
-                job.name
-            ))
-            yield from self.database.job.complete(job.name)
-            runid = yield from self.database.run.create(
-                failed=True,
-                job_id=job.id,
-                log="internal error",  # XXX: Fix this.
-                start_time=dt.datetime.utcnow(),
-                end_time=dt.datetime.utcnow(),
-            )
-            return
+
+        container = (yield from self.containers.get(job.name))
 
         state = container._container.get("State", {})
         running = state.get("Running", False)

@@ -6,7 +6,7 @@ from moxie.models import Job
 
 class CronService(Service):
     identifier = "moxie.cores.cron.CronService"
-    HEARTBEAT = 5
+    HEARTBEAT = 10
 
     @asyncio.coroutine
     def handle(self, job):
@@ -32,7 +32,8 @@ class CronService(Service):
                     dt.timedelta(seconds=self.HEARTBEAT))
             ))  # Get all jobs that we need to handle during this heartbeat
 
+            yield from self.logger.log("cron", "Wakeup")
             for job in jobs:
                 asyncio.async(self.handle(job))
-
+            yield from self.logger.log("cron", "Sleep")
             yield from asyncio.sleep(self.HEARTBEAT)

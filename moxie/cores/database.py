@@ -132,6 +132,20 @@ class DatabaseService(Service):
 
         @guard
         @asyncio.coroutine
+        def reschedule_now(self, name):
+            state = yield from self.get(name)
+            with (yield from self.db.engine) as conn:
+                yield from conn.execute(update(
+                    Job.__table__
+                ).where(
+                    Job.name==name
+                ).values(
+                    active=False,
+                    scheduled=dt.datetime.utcnow(),
+                ))
+
+        @guard
+        @asyncio.coroutine
         def complete(self, name):
             state = yield from self.get(name)
             if state.active == False:
