@@ -18,7 +18,6 @@ class Job(Base):
     scheduled = Column(DateTime)
     interval = Column(Interval)
     active = Column(Boolean)
-    started = Column(Boolean)
 
     env_id = Column(Integer, ForeignKey('env_set.id'))
     env = relationship(
