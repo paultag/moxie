@@ -1,9 +1,18 @@
 
 def serve():
     import asyncio
+    from moxie.app import app
+
+    import socket
+    import os.path
+    import sys
+    import os
+
 
     from moxie.cores import (RunService, LogService, CronService, ReapService,
                              DatabaseService, ContainerService)
+
+    loop = asyncio.get_event_loop()
 
     run = RunService()
     log = LogService()
@@ -12,9 +21,28 @@ def serve():
     db = DatabaseService()
     container = ContainerService()
 
-    loop = asyncio.get_event_loop()
-    server = loop.run_until_complete(asyncio.gather(
+
+    socket_fp = os.environ.get("MOXIE_SOCKET", None)
+    if socket_fp:
+        if os.path.exists(socket_fp):
+            os.remove(socket_fp)
+
+        print("Opening socket: %s" % (socket_fp))
+        server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        server.bind(socket_fp)
+        os.chmod(socket_fp, 0o766)
+        coro = loop.create_server(app, sock=server)
+    else:
+        host = os.environ.get("MOXIE_HOST", "127.0.0.1")
+        port = int(os.environ.get("MOXIE_PORT", "8888"))
+        coro = loop.create_server(app, host, port)
+
+    server = loop.run_until_complete(coro)
+    print('serving on {}'.format(server.sockets[0].getsockname()))
+
+    loop.run_until_complete(asyncio.gather(
         run(), log(), cron(), reap(), db(), container()))
+
 
 
 def init():
