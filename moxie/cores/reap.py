@@ -15,8 +15,6 @@ class ReapService(EventService):
 
     @asyncio.coroutine
     def reap(self, job):
-        yield from self.logger.log("reap", "Reaping job `%s`" % (job.name))
-
         try:
             container = (yield from self.containers.get(job.name))
         except ValueError:
@@ -36,9 +34,9 @@ class ReapService(EventService):
         state = container._container.get("State", {})
         running = state.get("Running", False)
         if running:
-            yield from self.logger.log(
-                "reap", "job `%s` still active" % (job.name))
             return  # No worries, we're not done yet!
+
+        yield from self.logger.log("reap", "Reaping job `%s`" % (job.name))
 
         exit = int(state.get("ExitCode", -1))
         start_time = dateutil.parser.parse(state.get("StartedAt"))
