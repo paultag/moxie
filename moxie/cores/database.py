@@ -1,5 +1,6 @@
 import asyncio
 import aiopg.sa
+import datetime as dt
 from aiocore import Service
 from sqlalchemy import update, insert, select
 
@@ -85,6 +86,16 @@ class DatabaseService(Service):
 
         @guard
         @asyncio.coroutine
+        def get(self, name):
+            with (yield from self.db.engine) as conn:
+                jobs = yield from conn.execute(select(
+                    [Job.__table__]).where(Job.name == name)
+                )
+                job = yield from jobs.first()
+                return job
+
+        @guard
+        @asyncio.coroutine
         def count(self):
             """
             Get the current Job count
@@ -96,8 +107,22 @@ class DatabaseService(Service):
         @guard
         @asyncio.coroutine
         def take(self, name):
+            state = yield from self.get(name)
+            if state.active == True:
+                raise ValueError("In progress already")
+
             with (yield from self.db.engine) as conn:
+                reschedule = (dt.datetime.utcnow() + state.interval)
                 yield from conn.execute(update(
+                    Job.__table__
+                ).where(
+                    Job.name==name
+                ).values(
+                    active=True,
+                    scheduled=reschedule,
+                ))
+
+                result = yield from conn.execute(update(
                     Job.__table__
                 ).where(
                     Job.name==name
@@ -108,6 +133,10 @@ class DatabaseService(Service):
         @guard
         @asyncio.coroutine
         def complete(self, name):
+            state = yield from self.get(name)
+            if state.active == False:
+                raise ValueError("Done already!")
+
             with (yield from self.db.engine) as conn:
                 yield from conn.execute(update(
                     Job.__table__

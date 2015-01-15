@@ -108,7 +108,13 @@ class RunService(EventService):
             "moxie.cores.container.ContainerService")
         self.database = EventService.resolve(
             "moxie.cores.database.DatabaseService")
-
         self.logger = EventService.resolve("moxie.cores.log.LogService")
+
+        try:
+            good = yield from self.database.job.take(job.name)
+        except ValueError:
+            yield from self.logger.log("run", "Job already active. Bailing")
+            return
+
         yield from self.logger.log("run", "Running Job: `%s`" % (job.name))
         yield from self._bringup(job)

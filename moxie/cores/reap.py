@@ -1,6 +1,8 @@
 from aiocore import EventService
 import asyncio
 import dateutil.parser
+import datetime as dt
+from moxie.models import Job
 
 
 class ReapService(EventService):
@@ -8,21 +10,31 @@ class ReapService(EventService):
 
     @asyncio.coroutine
     def reap(self, job):
-        # yield from self.logger.log("reap", "Reaping job `%s`" % (job.name))
+        yield from self.logger.log("reap", "Reaping job `%s`" % (job.name))
         try:
             container = (yield from self.containers.get(job.name))
-        except ValueError:
-            # yield from self.logger.log("reap", "job `%s` idle" % (
-            #     job.name
-            # ))
+        except ValueError as e:
+            # OK, wat. We're here because we're active in the DB, but it's gone.
+            # As a result, let's complete it and add a failed result
+            yield from self.logger.log("reap", "job `%s` INTERNAL FAILURE" % (
+                job.name
+            ))
+            yield from self.database.job.complete(job.name)
+            runid = yield from self.database.run.create(
+                failed=True,
+                job_id=job.id,
+                log="internal error",  # XXX: Fix this.
+                start_time=dt.datetime.utcnow(),
+                end_time=dt.datetime.utcnow(),
+            )
             return
 
         state = container._container.get("State", {})
         running = state.get("Running", False)
         if running:
-            # yield from self.logger.log("reap", "job `%s` still active" % (
-            #     job.name
-            # ))
+            yield from self.logger.log("reap", "job `%s` still active" % (
+                job.name
+            ))
             return  # No worries, we're not done yet!
 
         exit = int(state.get("ExitCode", -1))
@@ -32,7 +44,6 @@ class ReapService(EventService):
         log = yield from container.log(stdout=True, stderr=True)
         log = log.decode('utf-8')
 
-        yield from self.database.job.complete(job.name)
         runid = yield from self.database.run.create(
             failed=True if exit != 0 else False,
             job_id=job.id,
@@ -40,11 +51,12 @@ class ReapService(EventService):
             start_time=start_time,
             end_time=end_time
         )
+        yield from self.database.job.complete(job.name)
         yield from self.logger.log("reap", "job `%s` finished. Result `%s`" % (
             job.name,
             runid
         ))
-        yield from container.delete()
+        yield from self.containers.delete(job.name)
 
 
     @asyncio.coroutine
@@ -56,7 +68,7 @@ class ReapService(EventService):
         self.logger = EventService.resolve("moxie.cores.log.LogService")
 
         while True:
-            jobs = (yield from self.database.job.list())
+            jobs = (yield from self.database.job.list(Job.active == True))
             for job in jobs:
                 yield from self.reap(job)
             yield from asyncio.sleep(5)

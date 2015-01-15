@@ -12,10 +12,23 @@ class ContainerService(Service):
         self._containers = weakref.WeakValueDictionary()
         self._docker = Docker()
 
-
     @asyncio.coroutine
     def pull(self, name):
         return (yield from self._docker.pull(name))
+
+    def _purge_cache(self, name):
+        if name in self._containers:
+            self._containers.pop(name)
+
+    @asyncio.coroutine
+    def delete(self, name):
+        try:
+            obj = yield from self.get(name)
+        except ValueError:
+            return
+
+        self._purge_cache(name)
+        yield from obj.delete()
 
     @asyncio.coroutine
     def create(self, config, **kwargs):
@@ -25,8 +38,11 @@ class ContainerService(Service):
     def get(self, name):
         if name in self._containers:
             obj = self._containers[name]
-            yield from obj.show()  # update cache
-            return obj
+            try:
+                yield from obj.show()  # update cache
+                return obj
+            except ValueError:
+                self._purge_cache(name)
         container = yield from self._docker.containers.get(name)
         self._containers[name] = container
         return container
