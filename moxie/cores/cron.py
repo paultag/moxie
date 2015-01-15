@@ -6,7 +6,7 @@ from moxie.models import Job
 
 class CronService(Service):
     identifier = "moxie.cores.cron.CronService"
-    HEARTBEAT = 10
+    HEARTBEAT = 30
 
     @asyncio.coroutine
     def handle(self, job):

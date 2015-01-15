@@ -6,6 +6,11 @@ from moxie.models import Job
 
 
 class ReapService(EventService):
+    """
+    Reap finished jobs. This is mutex with run, so that we can ensure that
+    we don't catch a job during bringup phase.
+    """
+
     identifier = "moxie.cores.reap.ReapService"
 
     @asyncio.coroutine
@@ -15,28 +20,24 @@ class ReapService(EventService):
         try:
             container = (yield from self.containers.get(job.name))
         except ValueError:
-            yield from self.logger.log("reap", "INTERNAL ERROR - %s" % (
-                job.name
-            ))
+            yield from self.logger.log(
+                "reap", "INTERNAL ERROR - %s" % (job.name))
             runid = yield from self.database.run.create(
                 failed=True,
                 job_id=job.id,
-                log="internal error",
+                log="moxie internal error. container went MIA.",
                 start_time=dt.datetime.utcnow(),
                 end_time=dt.datetime.utcnow(),
             )
             yield from self.database.job.complete(job.name)
-            yield from self.logger.log("reap", "Job punted. - %s" % (
-                job.name
-            ))
-            return  # No worries, we're not done yet!
+            yield from self.logger.log("reap", "Job punted. - %s" % (job.name))
+            return
 
         state = container._container.get("State", {})
         running = state.get("Running", False)
         if running:
-            yield from self.logger.log("reap", "job `%s` still active" % (
-                job.name
-            ))
+            yield from self.logger.log(
+                "reap", "job `%s` still active" % (job.name))
             return  # No worries, we're not done yet!
 
         exit = int(state.get("ExitCode", -1))
@@ -54,10 +55,8 @@ class ReapService(EventService):
             end_time=end_time
         )
         yield from self.database.job.complete(job.name)
-        yield from self.logger.log("reap", "job `%s` finished. Result `%s`" % (
-            job.name,
-            runid
-        ))
+        yield from self.logger.log(
+            "reap", "job `%s` finished. Result `%s`" % (job.name, runid))
         yield from self.containers.delete(job.name)
 
 

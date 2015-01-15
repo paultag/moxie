@@ -5,6 +5,11 @@ from aiodocker import Docker
 
 
 class ContainerService(Service):
+    """
+    This provides an interface to run container jobs somewhere off in the
+    ether somewhere.
+    """
+
     identifier = "moxie.cores.container.ContainerService"
 
     def __init__(self):

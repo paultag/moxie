@@ -9,6 +9,10 @@ from moxie.models import Job, Run, Env, Volume
 
 
 def guard(fn):
+    """
+    Create the engine if it's not already there.
+    """
+
     def _(self, *args, **kwargs):
         if self.db.engine is None:
             self.db.engine = yield from aiopg.sa.create_engine(
@@ -18,6 +22,10 @@ def guard(fn):
 
 
 class DatabaseService(Service):
+    """
+    Proxy access to the database.
+    """
+
     identifier = "moxie.cores.database.DatabaseService"
     engine = None
 

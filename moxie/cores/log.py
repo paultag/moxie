@@ -3,6 +3,10 @@ from aiocore import EventService
 
 
 class LogService(EventService):
+    """
+    Provide basic text logging using print()
+    """
+
     identifier = "moxie.cores.log.LogService"
 
     @asyncio.coroutine

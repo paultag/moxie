@@ -62,7 +62,7 @@ class RunService(EventService):
             "Binds": binds,
             "Privileged": False,
             "PortBindings": [],
-            "Links": [],
+            "Links": [],  # XXX: Fix me!
         })
 
         yield from self.database.job.reschedule(job.name)
