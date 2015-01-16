@@ -8,5 +8,5 @@ jobs:
       description: "OpenStates"
       maintainer: "paultag@example.com"
       manual: true
-      command: "ks --leg"
+      command: "ks --leg --scrape"
       image: "sunlightlabs/openstates"
