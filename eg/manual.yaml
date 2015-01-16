@@ -1,0 +1,12 @@
+---
+maintainers:
+    - name: "Paul Tagliamonte"
+      email: "paultag@example.com"
+
+jobs:
+    - name: "test"
+      description: "OpenStates"
+      maintainer: "paultag@example.com"
+      manual: true
+      command: "update ks --leg"
+      image: "sunlightlabs/openstates"
