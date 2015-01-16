@@ -69,9 +69,9 @@ class ReapService(EventService):
 
         while True:
             jobs = (yield from self.database.job.list(Job.active == True))
-            yield from self.logger.log("reap", "Wakeup")
+            # yield from self.logger.log("reap", "Wakeup")
             for job in jobs:
                 with (yield from self.run.lock):
                     yield from self.reap(job)
-            yield from self.logger.log("reap", "Sleep")
+            # yield from self.logger.log("reap", "Sleep")
             yield from asyncio.sleep(5)

@@ -33,8 +33,8 @@ class CronService(Service):
                     dt.timedelta(seconds=self.HEARTBEAT))
             ))
 
-            yield from self.logger.log("cron", "Wakeup")
+            # yield from self.logger.log("cron", "Wakeup")
             for job in jobs:
                 asyncio.async(self.handle(job))
-            yield from self.logger.log("cron", "Sleep")
+            # yield from self.logger.log("cron", "Sleep")
             yield from asyncio.sleep(self.HEARTBEAT)
