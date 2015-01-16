@@ -33,7 +33,7 @@ def exit(stdin, stdout, stderr, args=None):
 @asyncio.coroutine
 def readl(stdin, stdout, echo=True):
     buf = ""
-    while True:
+    while not stdin.at_eof():
         bytes_ = (yield from stdin.read())
         for byte in bytes_:
             obyte = ord(byte)
@@ -54,7 +54,7 @@ def readl(stdin, stdout, echo=True):
             if echo:
                 stdout.write(byte)
             buf += byte
-
+    return buf
 
 @asyncio.coroutine
 def error(name, stdin, stdout, stderr):
@@ -173,8 +173,6 @@ def handler(key, user, container):
 \n\r
 """.format(hashlib.sha224(key.export_public_key('pkcs1-der')).hexdigest()))
 
-
-
             stdout.close()
             stderr.close()
             return
@@ -182,7 +180,7 @@ def handler(key, user, container):
         stdout.write("Welcome, {}\n\r".format(user.name))
         stdout.write(MOTD)
 
-        while True:
+        while not stdin.at_eof():
             stdout.write("* ")
             try:
                 line = yield from readl(stdin, stdout)
@@ -201,11 +199,17 @@ def handler(key, user, container):
                 yield from error(line, stdin, stdout, stderr)
 
             stdout.write("\r\n")
+
+        stdout.close()
+        stderr.close()
+
     return handle_connection
 
 
 class MoxieSSHServer(asyncssh.SSHServer):
     _keys = None
+    container = None
+    user = None
 
     def begin_auth(self, username):
         self.container = username
