@@ -67,6 +67,7 @@ def run(stdin, stdout, stderr, *, args=None):
     name, = args
 
     stdout.write("Starting job %s...\r\n" % (name))
+
     try:
         yield from run.run(name)
     except ValueError as e:
@@ -74,6 +75,8 @@ def run(stdin, stdout, stderr, *, args=None):
         return
 
     stdout.write("Job started")
+    stdout.write("\n\r" * 3)
+    yield from attach(stdin, stdout, stderr, args=args)
 
 
 @command("kill")
@@ -105,7 +108,7 @@ def aborter(stdin, *peers):
 
 
 @command("attach")
-def run(stdin, stdout, stderr, *, args=None):
+def attach(stdin, stdout, stderr, *, args=None):
     container = Service.resolve("moxie.cores.container.ContainerService")
     if len(args) != 1:
         stderr.write("Just give me a single job name")
