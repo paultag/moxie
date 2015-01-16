@@ -34,20 +34,26 @@ def exit(stdin, stdout, stderr, args=None):
 def readl(stdin, stdout, echo=True):
     buf = ""
     while True:
-        byte = (yield from stdin.read())
-        obyte = ord(byte)
-        if obyte < 0x20:
-            if obyte == 0x03:
-                raise StopItError("C-c")
-            if obyte == 0x04:
-                raise EOFError("EOF hit")
-            if obyte == 13:
-                stdout.write("\r\n")
-                return buf.strip()
-            continue
-        if echo:
-            stdout.write(byte)
-        buf += byte
+        bytes_ = (yield from stdin.read())
+        for byte in bytes_:
+            obyte = ord(byte)
+            if obyte == 0x08 or obyte == 127:
+                if buf != "":
+                    stdout.write('\x08 \x08')
+                    buf = buf[:-1]
+                continue
+            if obyte < 0x20:
+                if obyte == 0x03:
+                    raise StopItError("C-c")
+                if obyte == 0x04:
+                    raise EOFError("EOF hit")
+                if obyte == 13:
+                    stdout.write("\r\n")
+                    return buf.strip()
+                continue
+            if echo:
+                stdout.write(byte)
+            buf += byte
 
 
 @asyncio.coroutine
