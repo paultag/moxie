@@ -27,10 +27,11 @@ class CronService(Service):
 
         while True:
             jobs = (yield from self.database.job.list(
+                Job.manual == False,
                 Job.scheduled <= (
                     dt.datetime.utcnow() +
                     dt.timedelta(seconds=self.HEARTBEAT))
-            ))  # Get all jobs that we need to handle during this heartbeat
+            ))
 
             yield from self.logger.log("cron", "Wakeup")
             for job in jobs:

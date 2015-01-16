@@ -2,7 +2,7 @@ import asyncio
 import aiopg.sa
 import datetime as dt
 from aiocore import Service
-from sqlalchemy import update, insert, select
+from sqlalchemy import update, insert, select, and_
 
 from moxie.core import DATABASE_URL
 from moxie.models import Job, Run, Env, Volume
@@ -79,14 +79,17 @@ class DatabaseService(Service):
 
         @guard
         @asyncio.coroutine
-        def list(self, where=None):
+        def list(self, *where):
             """
             Get all known jobs
             """
-            if where is None:
+            if len(where) == 0:
                 q = Job.__table__.select()
             else:
-                q = select([Job.__table__]).where(where)
+                clause = where[0]
+                if len(where) > 1:
+                    clause = and_(*where)
+                q = select([Job.__table__]).where(clause)
 
             with (yield from self.db.engine) as conn:
                 jobs = (yield from conn.execute(q))

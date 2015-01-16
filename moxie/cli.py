@@ -10,17 +10,17 @@ def serve():
 
 
     from moxie.cores import (RunService, LogService, CronService, ReapService,
-                             DatabaseService, ContainerService)
+                             DatabaseService, ContainerService, SSHService)
 
     loop = asyncio.get_event_loop()
 
     run = RunService()
+    ssh = SSHService()
     log = LogService()
     cron = CronService()
     reap = ReapService()
     db = DatabaseService()
     container = ContainerService()
-
 
     socket_fp = os.environ.get("MOXIE_SOCKET", None)
     if socket_fp:
@@ -41,7 +41,7 @@ def serve():
     print('serving on {}'.format(server.sockets[0].getsockname()))
 
     loop.run_until_complete(asyncio.gather(
-        run(), log(), cron(), reap(), db(), container()))
+        ssh(), run(), log(), cron(), reap(), db(), container()))
 
 
 
