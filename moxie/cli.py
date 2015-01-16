@@ -183,8 +183,12 @@ def load():
         for job in data['jobs']:
             o = get_one(Job, Job.name == job['name'])
 
-            interval = job.pop('interval')
-            job['interval'] = dt.timedelta(seconds=interval)
+            manual = job.pop('manual', False)
+            job['manual'] = manual
+
+            if not manual:
+                interval = job.pop('interval')
+                job['interval'] = dt.timedelta(seconds=interval)
 
             job['maintainer_id'] = get_one(
                 Maintainer,
