@@ -17,7 +17,7 @@ class CronService(Service):
             "cron", "Job: %s -- Sleeping for `%s` seconds" % (
                 job.name, seconds))
         yield from asyncio.sleep(seconds)
-        yield from self.run.run(job)
+        yield from self.run.run(job.name)
 
     @asyncio.coroutine
     def __call__(self):

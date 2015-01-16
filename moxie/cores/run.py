@@ -119,23 +119,15 @@ class RunService(EventService):
 
     @asyncio.coroutine
     def run(self, job):
-        return (yield from self.send({
-            "type": "run",
-            "job": job
-        }))
-
-    @asyncio.coroutine
-    def handle(self, message):
-        type_ = message.pop("type")
-        return (yield from {"run": self.handle_job}[type_](**message))
-
-    @asyncio.coroutine
-    def handle_job(self, job):
         self.containers = EventService.resolve(
             "moxie.cores.container.ContainerService")
         self.database = EventService.resolve(
             "moxie.cores.database.DatabaseService")
         self.logger = EventService.resolve("moxie.cores.log.LogService")
+
+        job = yield from self.database.job.get(job)
+        if job is None:
+            raise ValueError("No such job name!")
 
         with (yield from self.lock):
             try:
