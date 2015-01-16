@@ -143,7 +143,17 @@ def handler(user, container):
     @asyncio.coroutine
     def handle_connection(stdin, stdout, stderr):
         if user is None:
-            stderr.write("SSH works, but you did not provide a known key.\n\r")
+            stderr.write("""\
+\n\r
+           SSH works, but you did not provide a known key.\n\r
+
+    This may happen if your key is authorized but no User model is created\r
+    for you yet. Ping the cluster operator.
+
+   Your motives for doing whatever good deed you may have in mind will be\r
+   misinterpreted by somebody.\n\r
+\n\r
+""")
             stdout.close()
             stderr.close()
             return
