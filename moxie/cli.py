@@ -75,7 +75,7 @@ def load():
     import datetime as dt
     from sqlalchemy import create_engine
     from sqlalchemy.orm import sessionmaker
-    from moxie.models import (Base, Job, Maintainer,
+    from moxie.models import (Base, Job, Maintainer, User,
                               EnvSet, VolumeSet, LinkSet,
                               Env, Volume, Link)
     from moxie.core import DATABASE_URL
@@ -90,7 +90,18 @@ def load():
     for fp in sys.argv[1:]:
         data = yaml.load(open(fp, 'r'))
 
-        for maintainer in data['maintainers']:
+        for user in data.pop('users', []):
+            o = get_one(User, User.name == user['name'])
+
+            if o is None:
+                u = User(**user)
+                print("Inserting: ", user['name'])
+                session.add(u)
+            else:
+                session.add(_update(o, user))
+                print("Updating:  ", user['name'])
+
+        for maintainer in data.pop('maintainers', []):
             o = get_one(Maintainer, Maintainer.name == maintainer['name'])
 
             if o is None:
@@ -180,7 +191,7 @@ def load():
 
         session.commit()
 
-        for job in data['jobs']:
+        for job in data.pop('jobs', []):
             o = get_one(Job, Job.name == job['name'])
 
             manual = job.pop('manual', False)

@@ -1,8 +1,8 @@
+import hashlib
 import asyncio
 import asyncssh
 from aiocore import Service
 
-ssh_host_keys = asyncssh.read_private_key_list('ssh_host_keys')
 
 MOTD = """
 
@@ -139,9 +139,16 @@ def attach(stdin, stdout, stderr, *, args=None):
         return
 
 
-def handler(username):
+def handler(user, container):
     @asyncio.coroutine
     def handle_connection(stdin, stdout, stderr):
+        if user is None:
+            stderr.write("SSH works, but you did not provide a known key.\n\r")
+            stdout.close()
+            stderr.close()
+            return
+
+        stdout.write("Welcome, {}\n\r".format(user.name))
         stdout.write(MOTD)
 
         while True:
@@ -167,12 +174,32 @@ def handler(username):
 
 
 class MoxieSSHServer(asyncssh.SSHServer):
-    def begin_auth(self, username):
-        self.username = username
-        return False
-    def session_requested(self):
-        return handler(self.username)
+    _keys = None
 
+    def begin_auth(self, username):
+        self.container = username
+        return True
+
+    def session_requested(self):
+        return handler(self.user, self.container)
+
+    def public_key_auth_supported(self):
+        return True
+
+    def validate_public_key(self, username, key):
+        if self._keys is None:
+            return False
+
+        valid = key in self._keys
+        if valid is False:
+            return False
+
+        self.user = self._keys[key]
+        return True
+
+
+def fingerprint(key):
+    return hashlib.sha224(key.export_public_key('pkcs1-der')).hexdigest()
 
 
 class SSHService(Service):
@@ -180,8 +207,21 @@ class SSHService(Service):
 
     @asyncio.coroutine
     def __call__(self):
+        database = Service.resolve("moxie.cores.database.DatabaseService")
+        ssh_host_keys = asyncssh.read_private_key_list('ssh_host_keys')
+
+        if MoxieSSHServer._keys is None:
+            authorized_keys = {}
+            for key in asyncssh.read_public_key_list('authorized_keys'):
+                authorized_keys[key] = (yield from
+                                        database.user.get_by_fingerprint(
+                                            fingerprint(key)))
+
+            MoxieSSHServer._keys = authorized_keys
+
         obj = yield from asyncssh.create_server(
             MoxieSSHServer, 'localhost', 1337,
             server_host_keys=ssh_host_keys
         )
+
         return obj

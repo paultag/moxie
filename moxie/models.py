@@ -56,6 +56,14 @@ class Maintainer(Base):
     email = Column(String(255), unique=True)
 
 
+class User(Base):
+    __tablename__ = 'user'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(255))
+    email = Column(String(255), unique=True)
+    fingerprint = Column(String(255), unique=True)
+
+
 class Run(Base):
     __tablename__ = 'run'
     id = Column(Integer, primary_key=True)

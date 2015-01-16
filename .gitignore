@@ -4,3 +4,4 @@
 static
 keys
 ssh_host_keys
+authorized_keys
