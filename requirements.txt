@@ -1,7 +1,7 @@
 aiocore
 aiopg
 -e git+https://github.com/KeepSafe/aiohttp#egg=aiohttp
--e git+https://github.com/paultag/aiodocker#egg=aiodocker
+aiodocker
 sqlalchemy
 jinja2
 pyyaml
