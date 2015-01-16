@@ -139,7 +139,7 @@ def attach(stdin, stdout, stderr, *, args=None):
         return
 
 
-def handler(user, container):
+def handler(key, user, container):
     @asyncio.coroutine
     def handle_connection(stdin, stdout, stderr):
         if user is None:
@@ -148,12 +148,17 @@ def handler(user, container):
            SSH works, but you did not provide a known key.\n\r
 
     This may happen if your key is authorized but no User model is created\r
-    for you yet. Ping the cluster operator.
+    for you yet. Ping the cluster operator.\r
 
    Your motives for doing whatever good deed you may have in mind will be\r
-   misinterpreted by somebody.\n\r
+   misinterpreted by somebody.\r
+\r
+    Fingerprint: {}
 \n\r
-""")
+""".format(hashlib.sha224(key.export_public_key('pkcs1-der')).hexdigest()))
+
+
+
             stdout.close()
             stderr.close()
             return
@@ -191,12 +196,14 @@ class MoxieSSHServer(asyncssh.SSHServer):
         return True
 
     def session_requested(self):
-        return handler(self.user, self.container)
+        return handler(self.key, self.user, self.container)
 
     def public_key_auth_supported(self):
         return True
 
     def validate_public_key(self, username, key):
+        self.key = key
+
         if self._keys is None:
             return False
 
