@@ -76,6 +76,66 @@ def run(stdin, stdout, stderr, *, args=None):
     stdout.write("Job started")
 
 
+@command("kill")
+def kill(stdin, stdout, stderr, *, args=None):
+    container = Service.resolve("moxie.cores.container.ContainerService")
+    if len(args) != 1:
+        stderr.write("Just give me a single job name")
+        return
+
+    name, = args
+
+    stdout.write("Killing job %s...\r\n" % (name))
+    try:
+        yield from container.kill(name)
+    except ValueError as e:
+        stderr.write(str(e))
+        return
+
+    stdout.write("Job terminated")
+
+
+def aborter(stdin, *peers):
+    while True:
+        stream = yield from stdin.read()
+        if ord(stream) == 0x03:
+            for peer in peers:
+                peer.throw(StopItError("We got a C-c, abort"))
+                return
+
+
+@command("attach")
+def run(stdin, stdout, stderr, *, args=None):
+    container = Service.resolve("moxie.cores.container.ContainerService")
+    if len(args) != 1:
+        stderr.write("Just give me a single job name")
+        return
+
+    name, = args
+
+    try:
+        container = yield from container.get(name)
+    except ValueError as e:
+        stderr.write(str(e))
+        return
+
+    @asyncio.coroutine
+    def writer():
+        logs = container.logs
+        logs.saferun()
+        queue = logs.listen()
+
+        while True:
+            out = yield from queue.get()
+            stdout.write(out.decode('utf-8'))
+
+    w = writer()
+    try:
+        yield from asyncio.gather(w, aborter(stdin, w))
+    except StopItError:
+        return
+
+
 def handler(username):
     @asyncio.coroutine
     def handle_connection(stdin, stdout, stderr):

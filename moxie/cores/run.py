@@ -65,7 +65,8 @@ class RunService(EventService):
             "Links": [],  # XXX: Fix me!
         })
 
-        yield from self.database.job.reschedule(job.name)
+        if not job.manual:
+            yield from self.database.job.reschedule(job.name)
 
 
     @asyncio.coroutine

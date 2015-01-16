@@ -17,27 +17,29 @@ docker = Docker()
 
 @app.websocket("^websocket/events/$")
 def stream(request):
+    return
+
     events = docker.events
     events.saferun()
     queue = events.listen()
-    return
-    # while True:
-    #     event = yield from queue.get()
-    #     request.writer.send(json.dumps({
-    #         "status": event.get("status"),
-    #     }))
+    while True:
+        event = yield from queue.get()
+        request.writer.send(json.dumps({
+            "status": event.get("status"),
+        }))
 
 
 @app.websocket("^websocket/stream/(?P<container>.*)/$")
 def stream(request, container):
+    return
+
     container = yield from docker.containers.get(container)
     logs = container.logs
     logs.saferun()
     queue = logs.listen()
-    return
-    # while True:
-    #     out = yield from queue.get()
-    #     request.writer.send(out)
+    while True:
+        out = yield from queue.get()
+        request.writer.send(out)
 
 
 @app.register("^/$")

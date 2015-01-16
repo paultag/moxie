@@ -141,7 +141,7 @@ class DatabaseService(Service):
                 raise ValueError("In progress already")
 
             with (yield from self.db.engine) as conn:
-                if not state.manual:
+                if state.manual is False:
                     yield from self.reschedule(name)
 
                 result = yield from conn.execute(update(

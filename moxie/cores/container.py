@@ -45,6 +45,11 @@ class ContainerService(Service):
         return (yield from obj.start(config, **kwargs))
 
     @asyncio.coroutine
+    def kill(self, name, *args, **kwargs):
+        obj = yield from self.get(name)
+        return (yield from obj.kill(*args, **kwargs))
+
+    @asyncio.coroutine
     def get(self, name):
         if name in self._containers:
             obj = self._containers[name]
