@@ -1,5 +1,6 @@
 aiocore
 asyncssh
+cryptography
 aiopg
 -e git+https://github.com/KeepSafe/aiohttp#egg=aiohttp
 aiodocker
