@@ -63,6 +63,16 @@ def error(name, stdin, stdout, stderr):
 """.format(name))
 
 
+@command("list")
+def list(stdin, stdout, stderr, *, args=None):
+    database = Service.resolve("moxie.cores.database.DatabaseService")
+
+    jobs = yield from database.job.list()
+
+    for job in jobs:
+        stdout.write("[%s] - %s - %s\n\r" % (job.name, job.image, job.command))
+
+
 @command("run")
 def run(stdin, stdout, stderr, *, args=None):
     run = Service.resolve("moxie.cores.run.RunService")
