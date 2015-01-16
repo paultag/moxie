@@ -119,6 +119,9 @@ class DatabaseService(Service):
         @asyncio.coroutine
         def reschedule(self, name):
             state = yield from self.get(name)
+            if state.manual:
+                raise ValueError("Can't reschedule")
+
             with (yield from self.db.engine) as conn:
                 reschedule = (dt.datetime.utcnow() + state.interval)
                 yield from conn.execute(update(
@@ -138,15 +141,8 @@ class DatabaseService(Service):
                 raise ValueError("In progress already")
 
             with (yield from self.db.engine) as conn:
-                reschedule = (dt.datetime.utcnow() + state.interval)
-                yield from conn.execute(update(
-                    Job.__table__
-                ).where(
-                    Job.name==name
-                ).values(
-                    active=True,
-                    scheduled=reschedule,
-                ))
+                if not state.manual:
+                    yield from self.reschedule(name)
 
                 result = yield from conn.execute(update(
                     Job.__table__
