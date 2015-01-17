@@ -204,6 +204,9 @@ def handler(key, user, container):
             stdout.write("* ")
             try:
                 line = yield from readl(stdin, stdout)
+            except asyncssh.misc.TerminalSizeChanged:
+                stdout.write("\r")
+                continue
             except (StopItError, EOFError):
                 stdout.close()
                 stderr.close()
