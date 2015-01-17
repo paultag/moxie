@@ -9,31 +9,17 @@ from sqlalchemy import select, join
 from moxie.server import MoxieApp
 from moxie.models import Job, Maintainer, Run
 from moxie.core import DATABASE_URL
+from aiocore import Service
 
 
 app = MoxieApp()
 docker = Docker()
 
 
-@app.websocket("^websocket/events/$")
-def stream(request):
-    return
-
-    events = docker.events
-    events.saferun()
-    queue = events.listen()
-    while True:
-        event = yield from queue.get()
-        request.writer.send(json.dumps({
-            "status": event.get("status"),
-        }))
-
-
-@app.websocket("^websocket/stream/(?P<container>.*)/$")
-def stream(request, container):
-    return
-
-    container = yield from docker.containers.get(container)
+@app.websocket("^websocket/stream/(?P<name>.*)/$")
+def stream(request, name):
+    container = Service.resolve("moxie.cores.container.ContainerService")
+    container = yield from container.get(name)
     logs = container.logs
     logs.saferun()
     queue = logs.listen()

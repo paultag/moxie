@@ -34,7 +34,7 @@ class MoxieApp(object):
         def _(fn):
             @self.register(path)
             def _r(request, *args, **kwargs):
-                status, headers, parser, writer = websocket.do_handshake(
+                status, headers, parser, writer, _ = websocket.do_handshake(
                     request.message.method, request.message.headers,
                     request.handler.transport)
 
