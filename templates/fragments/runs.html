@@ -1,3 +1,14 @@
+{% if not jobs %}
+
+<div class="well">
+    <h3>No runs</h3>
+    <p>
+    This job's never been run before. Run this job to see a log show up
+    here!
+    </p>
+</div>
+
+{% else %}
   <div class="table-responsive">
     <table class="table table-striped">
       <thead>
@@ -22,3 +33,4 @@
       </tbody>
     </table>
   </div>
+{% endif %}

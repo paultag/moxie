@@ -1,3 +1,23 @@
+#  Copyright (c) Paul R. Tagliamonte <tag@pault.ag>, 2015
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+# DEALINGS IN THE SOFTWARE.
+
 import aiopg.sa
 import asyncio
 import aiohttp
@@ -9,31 +29,17 @@ from sqlalchemy import select, join
 from moxie.server import MoxieApp
 from moxie.models import Job, Maintainer, Run
 from moxie.core import DATABASE_URL
+from aiocore import Service
 
 
 app = MoxieApp()
 docker = Docker()
 
 
-@app.websocket("^websocket/events/$")
-def stream(request):
-    return
-
-    events = docker.events
-    events.saferun()
-    queue = events.listen()
-    while True:
-        event = yield from queue.get()
-        request.writer.send(json.dumps({
-            "status": event.get("status"),
-        }))
-
-
-@app.websocket("^websocket/stream/(?P<container>.*)/$")
-def stream(request, container):
-    return
-
-    container = yield from docker.containers.get(container)
+@app.websocket("^websocket/stream/(?P<name>.*)/$")
+def stream(request, name):
+    container = Service.resolve("moxie.cores.container.ContainerService")
+    container = yield from container.get(name)
     logs = container.logs
     logs.saferun()
     queue = logs.listen()
