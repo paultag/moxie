@@ -10,7 +10,10 @@ pyyaml
 websockets
 alembic
 python-dateutil
--e git+https://github.com/jmoiron/humanize#egg=humanize
+-e git://github.com/jmoiron/humanize#egg=humanize
+
+slacker
+-e git://github.com/sunlightlabs/butterfield#egg=butterfield
 
 # Needed to build the scripts.
 # node-uglify
