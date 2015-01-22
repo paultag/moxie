@@ -20,6 +20,7 @@
 # DEALINGS IN THE SOFTWARE.
 
 import re
+import os
 import jinja2
 import os.path
 import mimetypes
@@ -30,7 +31,10 @@ import aiohttp.server
 from aiohttp import websocket
 
 _jinja_env = jinja2.Environment(
-    loader=jinja2.FileSystemLoader('templates')
+    loader=jinja2.FileSystemLoader(os.path.join(
+        os.path.abspath(os.path.dirname(__file__)),
+        'templates'
+    ))
 )
 
 
