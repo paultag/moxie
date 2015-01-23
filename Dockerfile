@@ -11,10 +11,13 @@ RUN apt-get update && apt-get install -y \
     node-less \
     coffeescript
 
-RUN apt-get update && apt-get build-dep -y python3-psycopg2
+RUN apt-get update && apt-get build-dep -y python3-psycopg2 python3-cryptography
 
 RUN mkdir -p /opt/pault.ag/
 ADD . /opt/pault.ag/moxie/
+
+RUN cd /opt/pault.ag/moxie; python3.4 /usr/bin/pip3 install slacker websockets
+# Hurm. Why?
 
 RUN cd /opt/pault.ag/moxie; python3.4 /usr/bin/pip3 install -r \
         requirements.txt
@@ -22,6 +25,9 @@ RUN cd /opt/pault.ag/moxie; python3.4 /usr/bin/pip3 install -r \
 RUN python3.4 /usr/bin/pip3 install -e \
         /opt/pault.ag/moxie/
 
-RUN make -C /moxie/
+RUN make -C /opt/pault.ag/moxie/
+
+RUN mkdir -p /moxie/
 WORKDIR /moxie/
+
 CMD ["moxied"]
