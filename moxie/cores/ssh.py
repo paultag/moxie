@@ -280,7 +280,7 @@ class SSHService(Service):
             MoxieSSHServer._keys = authorized_keys
 
         obj = yield from asyncssh.create_server(
-            MoxieSSHServer, 'localhost', 1337,
+            MoxieSSHServer, 'localhost', 2222,
             server_host_keys=ssh_host_keys
         )
 
