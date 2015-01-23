@@ -48,3 +48,6 @@ def run(bot, message: "message"):
         yield from bot.post(message['channel'],
             "Job {job} online - {webroot}/container/{job}/".format(
                 webroot=WEB_ROOT, job=job))
+    elif cmd == "yo":
+        yield from bot.post(
+                message['channel'], "Yo {}".format(message['user']))
