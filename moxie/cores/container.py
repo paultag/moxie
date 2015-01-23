@@ -24,6 +24,7 @@ from aiocore import Service
 from aiodocker import Docker
 
 
+
 class ContainerService(Service):
     """
     This provides an interface to run container jobs somewhere off in the
@@ -36,9 +37,16 @@ class ContainerService(Service):
         super(ContainerService, self).__init__()
         self._containers = weakref.WeakValueDictionary()
         self._docker = Docker()
+        self._database = Service.resolve("moxie.cores.database.DatabaseService")
+
+    def _check_container(self, name):
+        job = self._database.job.get(name)
+        # Check if active
+        return job is not None
 
     @asyncio.coroutine
     def pull(self, name):
+        self._check_container(name)
         return (yield from self._docker.pull(name))
 
     def _purge_cache(self, name):
@@ -47,6 +55,7 @@ class ContainerService(Service):
 
     @asyncio.coroutine
     def delete(self, name):
+        self._check_container(name)
         try:
             obj = yield from self.get(name)
         except ValueError:
@@ -61,16 +70,19 @@ class ContainerService(Service):
 
     @asyncio.coroutine
     def start(self, name, config, **kwargs):
+        self._check_container(name)
         obj = yield from self.get(name)
         return (yield from obj.start(config, **kwargs))
 
     @asyncio.coroutine
     def kill(self, name, *args, **kwargs):
+        self._check_container(name)
         obj = yield from self.get(name)
         return (yield from obj.kill(*args, **kwargs))
 
     @asyncio.coroutine
     def get(self, name):
+        self._check_container(name)
         if name in self._containers:
             obj = self._containers[name]
             try:
