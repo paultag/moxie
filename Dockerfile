@@ -22,6 +22,6 @@ RUN cd /opt/pault.ag/moxie; python3.4 /usr/bin/pip3 install -r \
 RUN python3.4 /usr/bin/pip3 install -e \
         /opt/pault.ag/moxie/
 
-RUN make -C /opt/pault.ag/moxie/
-WORKDIR /opt/pault.ag/moxie
+RUN make -C /moxie/
+WORKDIR /moxie/
 CMD ["moxied"]
