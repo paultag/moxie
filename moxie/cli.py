@@ -22,7 +22,7 @@
 def serve():
     import asyncio
     from moxie.app import app
-    # from butterfield import Bot
+    from butterfield import Bot
 
     import socket
     import os.path
@@ -34,8 +34,12 @@ def serve():
 
     loop = asyncio.get_event_loop()
 
-    # bot = Bot('')
-    # bot.listen("moxie.butterfield.run")
+    botcoro = asyncio.gather()
+    bot_key = os.environ.get("MOXIE_SLACKBOT_KEY", None)
+    if bot_key:
+        bot = Bot(bot_key)
+        bot.listen("moxie.butterfield.run")
+        botcoro = bot()
 
     run = RunService()
     ssh = SSHService()
@@ -64,8 +68,7 @@ def serve():
     print('serving on {}'.format(server.sockets[0].getsockname()))
 
     loop.run_until_complete(asyncio.gather(
-        # bot(),
-        ssh(), run(), log(), cron(), reap(), db(), container()))
+        botcoro, ssh(), run(), log(), cron(), reap(), db(), container()))
 
 
 
