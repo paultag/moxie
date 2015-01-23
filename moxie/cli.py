@@ -43,7 +43,7 @@ def serve():
 
         botcoro = asyncio.gather(
             bot(),
-            events(bot)
+            # events(bot)
         )
 
     run = RunService()
