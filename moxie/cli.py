@@ -24,23 +24,28 @@ def serve():
     from moxie.app import app
     from butterfield import Bot
     from .butterfield import events
+    from .butterfield import LogService as ButterfieldLogService
 
     import socket
     import os.path
     import sys
     import os
 
-    from moxie.cores import (RunService, LogService, CronService, ReapService,
+    from moxie.cores import (RunService, LogService,
+                             CronService, ReapService,
                              DatabaseService, ContainerService, SSHService)
 
     loop = asyncio.get_event_loop()
 
     botcoro = asyncio.gather()
     bot_key = os.environ.get("MOXIE_SLACKBOT_KEY", None)
+    log = LogService()
+
     if bot_key:
         bot = Bot(bot_key)
         bot.listen("moxie.butterfield.run")
 
+        log = ButterfieldLogService(bot)
         botcoro = asyncio.gather(
             bot(),
             # events(bot)
@@ -48,7 +53,6 @@ def serve():
 
     run = RunService()
     ssh = SSHService()
-    log = LogService()
     cron = CronService()
     reap = ReapService()
     db = DatabaseService()
