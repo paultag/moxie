@@ -45,7 +45,12 @@ class MoxieApp(object):
     def __init__(self):
         self.routes = []
         self.register('^static/(?P<path>.*)$')(self._do_static)
-        self._static_root = "static"
+        self._static_root = os.path.join(
+            os.path.abspath(os.path.dirname(__file__)),
+            '..',
+            'static'
+        )
+
         self._static_path = os.path.abspath(self._static_root)
 
     def register(self, path):
