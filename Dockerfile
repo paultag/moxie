@@ -24,4 +24,4 @@ RUN python3.4 /usr/bin/pip3 install -e \
 
 RUN make -C /opt/pault.ag/moxie/
 WORKDIR /opt/pault.ag/moxie
-CMD ["moxie-serve"]
+CMD ["moxied"]
