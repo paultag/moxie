@@ -54,9 +54,9 @@ def run(bot, message: "message"):
         yield from bot.post(message['channel'], "Invalid request")
         return
 
-    elif text.strip().lower() == "yo":
+    elif text.strip().lower() in ("yo", ":yo:"):
         yield from bot.post(
-            message['channel'], "Yo <@{}>".format(message['user']))
+            message['channel'], "<@{}>: :yo:".format(message['user']))
         return
 
     cmd, arg = text.split(" ", 1)
