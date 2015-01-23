@@ -46,6 +46,10 @@ class ContainerService(Service):
             raise ValueError("Sorry, that's not something you can kill")
 
     @asyncio.coroutine
+    def events(self, name):
+        return (yield from self._docker.events)
+
+    @asyncio.coroutine
     def pull(self, name):
         return (yield from self._docker.pull(name))
 
