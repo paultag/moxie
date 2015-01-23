@@ -3,10 +3,32 @@ import json
 import asyncio
 from butterfield.utils import at_bot
 from aiodocker import Docker
-from aiocore import Service
+from aiocore import EventService
 
 WEB_ROOT = os.environ.get("MOXIE_WEB_URL", "http://localhost:8888")
 
+
+class LogService(EventService):
+    """
+    Provide basic text logging using print()
+    """
+    identifier = "moxie.cores.log.LogService"
+
+    def __init__(self, bot, *args, **kwargs):
+        self.bot = bot
+        super(LogService, self).__init__(*args, **kwargs)
+
+    @asyncio.coroutine
+    def log(self, component, message):
+        yield from self.send({
+            "component": component,
+            "message": message,
+        })
+
+    @asyncio.coroutine
+    def handle(self, message):
+        yield from self.bot.post(
+            "#cron", "[{component}]: {message}".format(**message))
 
 
 @asyncio.coroutine
@@ -25,7 +47,7 @@ def events(bot):
 @asyncio.coroutine
 @at_bot
 def run(bot, message: "message"):
-    runner = Service.resolve("moxie.cores.run.RunService")
+    runner = EventService.resolve("moxie.cores.run.RunService")
 
     text = message.get("text", "")
     if text == "":
