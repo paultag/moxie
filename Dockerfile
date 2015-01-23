@@ -16,7 +16,8 @@ RUN apt-get update && apt-get build-dep -y python3-psycopg2 python3-cryptography
 RUN mkdir -p /opt/pault.ag/
 ADD . /opt/pault.ag/moxie/
 
-RUN cd /opt/pault.ag/moxie; python3.4 /usr/bin/pip3 install slacker websockets
+RUN cd /opt/pault.ag/moxie; python3.4 /usr/bin/pip3 install \
+    slacker websockets aiohttp
 # Hurm. Why?
 
 RUN cd /opt/pault.ag/moxie; python3.4 /usr/bin/pip3 install -r \
