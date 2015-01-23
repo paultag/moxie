@@ -47,7 +47,6 @@ class ContainerService(Service):
 
     @asyncio.coroutine
     def pull(self, name):
-        yield from self._check_container(name)
         return (yield from self._docker.pull(name))
 
     def _purge_cache(self, name):

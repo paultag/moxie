@@ -69,7 +69,7 @@ class RunService(EventService):
     def _start(self, job):
         container = yield from self._getc(job)
         if container is None:
-            container = yield from create(job, conn)
+            container = yield from self._create(job)
 
         volumes = yield from self.database.volume.get(job.volumes_id)
         binds = ["{host}:{container}".format(
