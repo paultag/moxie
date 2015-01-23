@@ -40,13 +40,14 @@ class ContainerService(Service):
         self._database = Service.resolve("moxie.cores.database.DatabaseService")
 
     def _check_container(self, name):
-        job = self._database.job.get(name)
+        job = yield from self._database.job.get(name)
         # Check if active
-        return job is not None
+        if job is None:
+            raise ValueError("Sorry, that's not something you can kill")
 
     @asyncio.coroutine
     def pull(self, name):
-        self._check_container(name)
+        yield from self._check_container(name)
         return (yield from self._docker.pull(name))
 
     def _purge_cache(self, name):
@@ -55,7 +56,7 @@ class ContainerService(Service):
 
     @asyncio.coroutine
     def delete(self, name):
-        self._check_container(name)
+        yield from self._check_container(name)
         try:
             obj = yield from self.get(name)
         except ValueError:
@@ -70,19 +71,19 @@ class ContainerService(Service):
 
     @asyncio.coroutine
     def start(self, name, config, **kwargs):
-        self._check_container(name)
+        yield from self._check_container(name)
         obj = yield from self.get(name)
         return (yield from obj.start(config, **kwargs))
 
     @asyncio.coroutine
     def kill(self, name, *args, **kwargs):
-        self._check_container(name)
+        yield from self._check_container(name)
         obj = yield from self.get(name)
         return (yield from obj.kill(*args, **kwargs))
 
     @asyncio.coroutine
     def get(self, name):
-        self._check_container(name)
+        yield from self._check_container(name)
         if name in self._containers:
             obj = self._containers[name]
             try:
