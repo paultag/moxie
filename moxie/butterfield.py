@@ -2,6 +2,9 @@ import os
 import json
 import asyncio
 from butterfield.utils import at_bot
+
+from moxie.facts import get_fact
+
 from aiodocker import Docker
 from aiocore import EventService
 
@@ -78,6 +81,11 @@ def run(bot, message: "message"):
     text = message.get("text", "")
     if text == "":
         yield from bot.post(message['channel'], "Invalid request")
+        return
+
+    elif text.strip().lower() == "fact":
+        yield from bot.post(
+            message['channel'], "<@{}>: {}".format(message['user'], get_fact()))
         return
 
     elif text.strip().lower() in ("yo", ":yo:"):
