@@ -27,13 +27,13 @@ class LogService(EventService):
             "error": "Error! {job} - {error}",
             "create": "Creating a container for {job}",
             "starting": "Starting {job}",
-            "started": "Job {job} started!",
+            "started": "Job {{job}} started! ({}/container/{{job}}/)".format(WEB_ROOT),
         },
         "reap": {
             "error": "Error! {job} - {error}",
             "punted": "Error! Internal problem, punting {job}",
             "start": "Reaping {job}",
-            "complete": "Job {job} reaped - run ID {record}",
+            "complete": "Job {{job}} reaped - run ID {{record}} ({}/run/{{record}}/)".format(WEB_ROOT),
         },
     }
 
