@@ -130,6 +130,7 @@ def run(stdin, stdout, stderr, *, args=None):
         stderr.write(str(e))
         return
 
+    stdout.write("    Wheatley: Surprise! We're doing it now!\r")
     stdout.write("Job started")
     stdout.write("\n\r" * 3)
     yield from attach(stdin, stdout, stderr, args=args)
@@ -139,18 +140,22 @@ def run(stdin, stdout, stderr, *, args=None):
 def kill(stdin, stdout, stderr, *, args=None):
     container = Service.resolve("moxie.cores.container.ContainerService")
     if len(args) != 1:
-        stderr.write("Just give me a single job name")
+        stderr.write("Just give me a single job name\r")
         return
 
     name, = args
 
     stdout.write("Killing job %s...\r\n" % (name))
+
+    stdout.write("      GLaDOS: Ah! Well, this is the part where he kills us.\r")
+
     try:
         yield from container.kill(name)
     except ValueError as e:
         stderr.write(str(e))
         return
 
+    stdout.write("    Wheatley: Hello! This is the part where I kill you!\r\r")
     stdout.write("Job terminated")
 
 
@@ -217,7 +222,7 @@ def handler(key, user, container):
             stderr.close()
             return
 
-        stdout.write("Welcome, {}\n\r".format(user.name))
+        stdout.write("Hey! I know you! You're {}\n\r".format(user.name))
         stdout.write(MOTD)
 
         while not stdin.at_eof():
