@@ -26,9 +26,11 @@ class LogService(EventService):
     def handle(self, message):
         yield from self.bot.post(
             "#cron",
-            "[{type}]: {action} - {message}".format(type=message['type'],
-                                                    action=message['action'],
-                                                    message=message))
+            "```[{type}]: {action} - {message}```".format(
+                type=message['type'],
+                action=message['action'],
+                message=message
+            ))
 
 
 @asyncio.coroutine
