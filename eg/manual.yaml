@@ -10,3 +10,9 @@ jobs:
       manual: true
       command: "ks --leg --scrape"
       image: "sunlightlabs/openstates"
+    - name: "quick"
+      description: "quick test"
+      maintainer: "paultag@example.com"
+      manual: true
+      command: "date"
+      image: "debian:unstable"
