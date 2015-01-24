@@ -21,6 +21,8 @@
 import hashlib
 import asyncio
 import asyncssh
+
+from moxie.facts import get_printable_fact
 from aiocore import Service
 
 
@@ -228,6 +230,7 @@ def handler(key, user, container):
 
         stdout.write("Hey! I know you! You're {}\n\r".format(user.name))
         stdout.write(MOTD)
+        stdout.write("\r\n{}\r\n\r\n".format(get_printable_fact()))
 
         while not stdin.at_eof():
             stdout.write("* ")
