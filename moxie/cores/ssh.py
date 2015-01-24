@@ -133,7 +133,6 @@ def run(stdin, stdout, stderr, *, args=None):
         return
 
     stdout.write("    Wheatley: Surprise! We're doing it now!\r\n")
-    stdout.write("Job started")
     stdout.write("\n\r" * 3)
     yield from attach(stdin, stdout, stderr, args=args)
 
@@ -199,6 +198,7 @@ def attach(stdin, stdout, stderr, *, args=None):
             out = yield from queue.get()
             stdout.write(out.decode('utf-8'))
         # raise StopItError("Attach EOF")
+        stdout.write("[ process complete ]\r\n")
 
     w = writer()
     try:
