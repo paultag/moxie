@@ -35,9 +35,9 @@ MOTD = """
   ,%MM@@MH ,@%=             .---=-=:=,.\r
   =@#@@@MX.,\r
  =-./@M@M$                         ▗            ▌    ▗    ▐        ▗▀▖\r
- X@/ -$MM/               ▛▚▀▖▞▀▖▚▗▘▄ ▞▀▖  ▞▀▘▞▀▘▛▀▖  ▄ ▛▀▖▜▀ ▞▀▖▙▀▖▐  ▝▀▖▞▀▖▞▀▖\r
-,@M@H: :@:               ▌▐ ▌▌ ▌▗▚ ▐ ▛▀   ▝▀▖▝▀▖▌ ▌  ▐ ▌ ▌▐ ▖▛▀ ▌  ▜▀ ▞▀▌▌ ▖▛▀\r
-,@@@MMX, .               ▘▝ ▘▝▀ ▘ ▘▀▘▝▀▘  ▀▀ ▀▀ ▘ ▘  ▀▘▘ ▘ ▀ ▝▀▘▘  ▐  ▝▀▘▝▀ ▝▀▘\r
+ X@/ -$MM/      ▛▚▀▖▞▀▖▚▗▘▄ ▞▀▖  ▞▀▘▞▀▘▛▀▖  ▄ ▛▀▖▜▀ ▞▀▖▙▀▖▐  ▝▀▖▞▀▖▞▀▖\r
+,@M@H: :@:      ▌▐ ▌▌ ▌▗▚ ▐ ▛▀   ▝▀▖▝▀▖▌ ▌  ▐ ▌ ▌▐ ▖▛▀ ▌  ▜▀ ▞▀▌▌ ▖▛▀\r
+,@@@MMX, .      ▘▝ ▘▝▀ ▘ ▘▀▘▝▀▘  ▀▀ ▀▀ ▘ ▘  ▀▘▘ ▘ ▀ ▝▀▘▘  ▐  ▝▀▘▝▀ ▝▀▘\r
 .H@@@@M@+,\r
  /MMMM@MMH/.                  XM@MH; =;\r
   /%+%$XHH@$=              , .H@@@@MX,\r
@@ -195,9 +195,10 @@ def attach(stdin, stdout, stderr, *, args=None):
         logs.saferun()
         queue = logs.listen()
 
-        while True:
+        while logs.running:
             out = yield from queue.get()
             stdout.write(out.decode('utf-8'))
+        raise StopItError("Attach EOF")
 
     w = writer()
     try:
