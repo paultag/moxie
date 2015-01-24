@@ -11,4 +11,4 @@ Long-running periodic job scheduler and runner.
 
 ![](http://i.imgur.com/roz0sGi.png)
 
-![](http://i.imgur.com/c9dkGoX.png)
+![](http://i.imgur.com/BSDcPrp.jpg)
