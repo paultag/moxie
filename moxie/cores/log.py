@@ -35,4 +35,6 @@ class LogService(EventService):
 
     @asyncio.coroutine
     def handle(self, message):
-        print("[{type}]: {action} - {message}".format(**message))
+        print("[{type}]: {action} - {message}".format(type=message['type'],
+                                               action=message['action'],
+                                               message=message))
