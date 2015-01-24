@@ -35,7 +35,7 @@ FACTS = [
     "In 1879, Sandford Fleming first proposed the adoption of worldwide standardized time zones at the Royal Canadian Institute.",
     "Marie Curie invented the theory of radioactivity, the treatment of radioactivity, and dying of radioactivity.",
     "At the end of The Seagull by Anton Chekhov, Konstantin kills himself.",
-    "Hot water freezes quicker than cold water.[1]",
+    "Hot water freezes quicker than cold water.",
     "The situation you are in is very dangerous.",
     "Polymerase I polypeptide A is a human gene. The shortened gene name is POLR1A",
 
@@ -60,17 +60,11 @@ FACTS = [
     "Edmund Hillary, the first person to climb Mount Everest, did so accidentally while chasing a bird.",
 
     "We will both die because of your negligence.",
-    "This is a bad plan. You will fail.",
-    "He will most likely kill you, violently.",
-    "He will most likely kill you.",
-    "You will be dead soon.",
-    "You are going to die in this room.",
     "The Fact Sphere is a good person, whose insights are relevant.",
     "The Fact Sphere is a good sphere, with many friends.",
     "You will never go into space.",
     "Dreams are the subconscious mind's way of reminding people to go to school naked and have their teeth fall out.",
 
-    "The Space Sphere will never go to space.",
     "The square root of rope is string.",
     "89% of magic tricks are not magic. Technically, they are sorcery.",
     "At some point in their lives 1 in 6 children will be abducted by the Dutch.",
@@ -112,7 +106,6 @@ FACTS = [
     "Avocados have the highest fiber and calories of any fruit. They are found in Australians. The second half is true, although avocados can also be found in other places.",
     "Every square inch of the human body has 32 million bacteria on it. Difficult to verify as it could vary depending on whether you're counting the internal surfaces as well.",
     "The average adult body contains half a pound of salt. Depends on how you define \"salt\".",
-    "The Adventure Sphere is a blowhard and a coward.",
 
     "Twelve. Twelve. Twelve. Twelve. Twelve. Twelve. Twelve. Twelve. Twelve. Twelve.",
     "Pens. Pens. Pens. Pens. Pens. Pens. Pens.",
