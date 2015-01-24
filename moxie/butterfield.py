@@ -89,16 +89,18 @@ def run(bot, message: "message"):
     if cmd == "run":
         job = arg
         yield from bot.post(
-            message['channel'], "Doing bringup of {}".format(job))
+            message['channel'], "<@{}>: Doing bringup of {}".format(
+                message['user'], job))
         try:
             yield from runner.run(job)
         except ValueError as e:
             yield from bot.post(
                 message['channel'],
-                "Gah, {job} failed - {e}".format(e=e, job=job)
+                "<@{user}>: Gah, {job} failed - {e}".format(
+                    user=message['user'], e=e, job=job)
             )
             return
 
         yield from bot.post(message['channel'],
-            "Job {job} online - {webroot}/container/{job}/".format(
-                webroot=WEB_ROOT, job=job))
+            "<@{user}>: job {job} online - {webroot}/container/{job}/".format(
+                user=message['user'], webroot=WEB_ROOT, job=job))
