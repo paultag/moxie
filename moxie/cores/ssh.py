@@ -198,7 +198,7 @@ def attach(stdin, stdout, stderr, *, args=None):
         while logs.running:
             out = yield from queue.get()
             stdout.write(out.decode('utf-8'))
-        raise StopItError("Attach EOF")
+        # raise StopItError("Attach EOF")
 
     w = writer()
     try:
