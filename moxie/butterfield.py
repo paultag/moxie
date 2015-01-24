@@ -19,16 +19,16 @@ class LogService(EventService):
         super(LogService, self).__init__(*args, **kwargs)
 
     @asyncio.coroutine
-    def log(self, component, message):
-        yield from self.send({
-            "component": component,
-            "message": message,
-        })
+    def log(self, message):
+        yield from self.send(message)
 
     @asyncio.coroutine
     def handle(self, message):
         yield from self.bot.post(
-            "#cron", "[{component}]: {message}".format(**message))
+            "#cron",
+            "[{type}]: {action} - {message}".format(type=message['type'],
+                                                    action=message['action'],
+                                                    message=message))
 
 
 @asyncio.coroutine
