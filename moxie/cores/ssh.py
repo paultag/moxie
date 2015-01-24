@@ -25,8 +25,28 @@ from aiocore import Service
 
 
 MOTD = """
-
-Welcome to Moxie's SSH management interface
+              .,-:;//;:=,\r
+          . :H@@@MM@M#H/.,+%;,\r
+       ,/X+ +M@@M@MM%=,-%HMMM@X/,\r
+     -+@MM; $M@@MH+-,;XMMMM@MMMM@+-\r
+    ;@M@@M- XM@X;. -+XXXXXHHH@M@M#@/.\r
+  ,%MM@@MH ,@%=             .---=-=:=,.\r
+  =@#@@@MX.,\r
+ =-./@M@M$                         ▗            ▌    ▗    ▐        ▗▀▖\r
+ X@/ -$MM/               ▛▚▀▖▞▀▖▚▗▘▄ ▞▀▖  ▞▀▘▞▀▘▛▀▖  ▄ ▛▀▖▜▀ ▞▀▖▙▀▖▐  ▝▀▖▞▀▖▞▀▖\r
+,@M@H: :@:               ▌▐ ▌▌ ▌▗▚ ▐ ▛▀   ▝▀▖▝▀▖▌ ▌  ▐ ▌ ▌▐ ▖▛▀ ▌  ▜▀ ▞▀▌▌ ▖▛▀\r
+,@@@MMX, .               ▘▝ ▘▝▀ ▘ ▘▀▘▝▀▘  ▀▀ ▀▀ ▘ ▘  ▀▘▘ ▘ ▀ ▝▀▘▘  ▐  ▝▀▘▝▀ ▝▀▘\r
+.H@@@@M@+,\r
+ /MMMM@MMH/.                  XM@MH; =;\r
+  /%+%$XHH@$=              , .H@@@@MX,\r
+   .=--------.           -%H.,@@@@@MX,\r
+   .%MM@@@HHHXX$$$%+- .:$MMX =M@@MM%.\r
+     =XMMM@MM@MM#H;,-+HMM@M+ /MMMX=\r
+       =%@M@M#@$-.=$@MM@@@M; %M%=\r
+         ,:+$+-,/H#MMMMMMM@= =,\r
+               =++%%%%+/:-.\r
+\r
+\r
 \r
 """
 
