@@ -34,12 +34,17 @@ class ReapService(EventService):
     identifier = "moxie.cores.reap.ReapService"
 
     @asyncio.coroutine
+    def log(self, action, **kwargs):
+        kwargs['type'] = "reap"
+        kwargs['action'] = action
+        yield from self.logger.log(kwargs)
+
+    @asyncio.coroutine
     def reap(self, job):
         try:
             container = (yield from self.containers.get(job.name))
-        except ValueError:
-            yield from self.logger.log(
-                "reap", "INTERNAL ERROR - %s" % (job.name))
+        except ValueError as e:
+            yield from self.log('error', error=e, job=job.name)
             runid = yield from self.database.run.create(
                 failed=True,
                 job_id=job.id,
@@ -48,7 +53,7 @@ class ReapService(EventService):
                 end_time=dt.datetime.utcnow(),
             )
             yield from self.database.job.complete(job.name)
-            yield from self.logger.log("reap", "Job punted. - %s" % (job.name))
+            yield from self.log('punted', job=job.name)
             return
 
         state = container._container.get("State", {})
@@ -56,7 +61,7 @@ class ReapService(EventService):
         if running:
             return  # No worries, we're not done yet!
 
-        yield from self.logger.log("reap", "Reaping job `%s`" % (job.name))
+        yield from self.log('start', job=job.name)
 
         exit = int(state.get("ExitCode", -1))
         start_time = dateutil.parser.parse(state.get("StartedAt"))
@@ -73,8 +78,7 @@ class ReapService(EventService):
             end_time=end_time
         )
         yield from self.database.job.complete(job.name)
-        yield from self.logger.log(
-            "reap", "job `%s` finished. Result `%s`" % (job.name, runid))
+        yield from self.log('complete', job=job.name)
         yield from self.containers.delete(job.name)
 
 

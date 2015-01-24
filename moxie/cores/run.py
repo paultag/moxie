@@ -31,6 +31,12 @@ class RunService(EventService):
         self.lock = asyncio.Lock()
 
     @asyncio.coroutine
+    def log(self, action, **kwargs):
+        kwargs['type'] = "run"
+        kwargs['action'] = action
+        yield from self.logger.log(kwargs)
+
+    @asyncio.coroutine
     def _getc(self, job):
         try:
             container = yield from self.containers.get(job.name)
@@ -56,10 +62,11 @@ class RunService(EventService):
         if container is None:
             c = yield from self._create(job)
             if c is None:
-                yield from self.logger.log(
-                    "run", "Uch, container {} couldn't be created.".format(
-                        job['name']
-                    ))
+                yield from self.log(
+                    'error',
+                    error="container can't be created",
+                    job=job['name']
+                )
                 return
             container = c
 
@@ -104,16 +111,15 @@ class RunService(EventService):
         env = ["{key}={value}".format(**x) for x in jobenvs]
         volumes = {x.host: x.container for x in volumes}
 
-        yield from self.logger.log("run", "Pulling: %s" % (job.image))
+        yield from self.log('pull', job=job.image)
+
         try:
             yield from self.containers.pull(job.image)
-        except ValueError:
-            yield from self.logger.log("run", "Pull failure for %s" % (
-                job.image
-            ))
+        except ValueError as e:
+            yield from self.log('error', error=e, job=job.image)
             return None
 
-        yield from self.logger.log("run", "Creating a new container")
+        yield from self.log('create', job=job.name)
         try:
             container = yield from self.containers.create(
                 {"Cmd": cmd,
@@ -128,12 +134,9 @@ class RunService(EventService):
                  "OpenStdin": False,
                  "StdinOnce": False},
                 name=job.name)
-            yield from self.logger.log("run", "Got a container: %s" % (
-                container._id
-            ))
+            yield from self.log('created', job=job.name, id=container._id)
         except ValueError as e:
-            yield from self.logger.log(
-                "run", "Creation failure for {}: {}".format(job['name'], e))
+            yield from self.log('error', job=job.name, error=e)
             return
 
         return container
@@ -154,9 +157,10 @@ class RunService(EventService):
             try:
                 good = yield from self.database.job.take(job.name)
             except ValueError:
-                yield from self.logger.log("run", "Job already active. Bailing")
+                yield from self.log('error', job=job.name, error="already active")
                 return
 
-            yield from self.logger.log("run", "Running Job: `%s`" % (job.name))
+            yield from self.log('starting', job=job.name)
             yield from self._bringup(job)
             yield from self._start(job)
+            yield from self.log('started', job=job.name)

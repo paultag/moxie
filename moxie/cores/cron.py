@@ -29,13 +29,17 @@ class CronService(Service):
     HEARTBEAT = 30
 
     @asyncio.coroutine
+    def log(self, action, **kwargs):
+        kwargs['type'] = "cron"
+        kwargs['action'] = action
+        yield from self.logger.log(kwargs)
+
+    @asyncio.coroutine
     def handle(self, job):
         delta = (dt.datetime.utcnow() - job.scheduled)
         seconds = -delta.total_seconds()
         seconds = 0 if seconds < 0 else seconds
-        yield from self.logger.log(
-            "cron", "Job: %s -- Sleeping for `%s` seconds" % (
-                job.name, seconds))
+        yield from self.log('sleep', time=seconds, job=job.name)
         yield from asyncio.sleep(seconds)
         yield from self.run.run(job.name)
 
