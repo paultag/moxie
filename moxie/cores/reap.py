@@ -78,7 +78,7 @@ class ReapService(EventService):
             end_time=end_time
         )
         yield from self.database.job.complete(job.name)
-        yield from self.log('complete', job=job.name)
+        yield from self.log('complete', record=runid, job=job.name)
         yield from self.containers.delete(job.name)
 
 

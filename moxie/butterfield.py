@@ -14,6 +14,26 @@ class LogService(EventService):
     """
     identifier = "moxie.cores.log.LogService"
 
+
+    FORMAT_STRINGS = {
+        "cron": {
+            "sleep": "{job} ready to run, launching in {time} seconds.",
+        },
+        "run": {
+            "pull": "Pulling {image} for {job}",
+            "error": "Error! {job} - {error}",
+            "create": "Creating a container for {job}",
+            "starting": "Starting {job}",
+            "started": "Job {job} started!",
+        },
+        "reap": {
+            "error": "Error! {job} - {error}",
+            "punted": "Error! Internal problem, punting {job}",
+            "start": "Reaping {job}",
+            "complete": "Job {job} reaped - run ID {record}",
+        },
+    }
+
     def __init__(self, bot, *args, **kwargs):
         self.bot = bot
         super(LogService, self).__init__(*args, **kwargs)
@@ -24,12 +44,16 @@ class LogService(EventService):
 
     @asyncio.coroutine
     def handle(self, message):
+        type_, action = [message.get(x) for x in ['type', 'action']]
+        strings = self.FORMAT_STRINGS.get(type_, {})
+        output = strings.get(action, str(message))
+
         yield from self.bot.post(
             "#cron",
-            "```[{type}]: {action} - {message}```".format(
+            "[{type}]: {action} - {message}".format(
                 type=message['type'],
                 action=message['action'],
-                message=message
+                message=output.format(**message),
             ))
 
 

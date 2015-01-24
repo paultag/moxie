@@ -111,7 +111,7 @@ class RunService(EventService):
         env = ["{key}={value}".format(**x) for x in jobenvs]
         volumes = {x.host: x.container for x in volumes}
 
-        yield from self.log('pull', job=job.image)
+        yield from self.log('pull', image=job.image, job=job.name)
 
         try:
             yield from self.containers.pull(job.image)
@@ -134,7 +134,6 @@ class RunService(EventService):
                  "OpenStdin": False,
                  "StdinOnce": False},
                 name=job.name)
-            yield from self.log('created', job=job.name, id=container._id)
         except ValueError as e:
             yield from self.log('error', job=job.name, error=e)
             return
