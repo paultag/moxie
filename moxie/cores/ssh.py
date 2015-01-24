@@ -130,7 +130,7 @@ def run(stdin, stdout, stderr, *, args=None):
         stderr.write(str(e))
         return
 
-    stdout.write("    Wheatley: Surprise! We're doing it now!\r")
+    stdout.write("    Wheatley: Surprise! We're doing it now!\r\n")
     stdout.write("Job started")
     stdout.write("\n\r" * 3)
     yield from attach(stdin, stdout, stderr, args=args)
@@ -145,9 +145,11 @@ def kill(stdin, stdout, stderr, *, args=None):
 
     name, = args
 
-    stdout.write("Killing job %s...\r\n" % (name))
+    stdout.write("Killing job %s...\r\n\r\n" % (name))
 
-    stdout.write("      GLaDOS: Ah! Well, this is the part where he kills us.\r")
+    stdout.write(
+        "      GLaDOS: Ah! Well, this is the part where he kills us.\r\n"
+    )
 
     try:
         yield from container.kill(name)
@@ -155,7 +157,9 @@ def kill(stdin, stdout, stderr, *, args=None):
         stderr.write(str(e))
         return
 
-    stdout.write("    Wheatley: Hello! This is the part where I kill you!\r\r")
+    stdout.write(
+        "    Wheatley: Hello! This is the part where I kill you!\r\n\r\n"
+    )
     stdout.write("Job terminated")
 
 
