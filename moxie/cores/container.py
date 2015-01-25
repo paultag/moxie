@@ -99,5 +99,10 @@ class ContainerService(Service):
         return container
 
     @asyncio.coroutine
+    def list(self, **kwargs):
+        containers = yield from self._docker.containers.list(**kwargs)
+        return containers
+
+    @asyncio.coroutine
     def __call__(self):
         pass

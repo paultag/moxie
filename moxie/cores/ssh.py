@@ -137,6 +137,30 @@ def run(stdin, stdout, stderr, *, args=None):
     yield from attach(stdin, stdout, stderr, args=args)
 
 
+@command("running")
+def running(stdin, stdout, stderr, *, args=None):
+    container = Service.resolve("moxie.cores.container.ContainerService")
+    database = Service.resolve("moxie.cores.database.DatabaseService")
+
+    jobs = (yield from database.job.list())
+    running = (yield from container.list(all=True))
+
+    nmap = {z: x for x in [x._container for x in running] for z in x['Names']}
+    for job in jobs:
+        cname = "/{}".format(job.name)
+        container = nmap.get(cname, {})
+        if container is None:
+            pass
+
+        stdout.write("{name}   -   {status}\n\r".format(
+            name=job.name,
+            status=container.get('Status', "offline")
+        ))
+
+    return
+
+
+
 @command("kill")
 def kill(stdin, stdout, stderr, *, args=None):
     container = Service.resolve("moxie.cores.container.ContainerService")
