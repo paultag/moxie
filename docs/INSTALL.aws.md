@@ -111,4 +111,48 @@ now. Eventually this will change.
 
 Huzzah. Also, feel free to change your login information to not be that.
 
+Let's start the setup:
 
+    # mkdir /etc/docker/
+    # nano /etc/docker/moxie.sh
+
+..
+
+    DATABASE_URL=postgres://moxie:moxie@172.17.42.1:5432/moxie
+    # MOXIE_SOCKET="/sockets/moxie.sock"
+    MOXIE_SLACKBOT_KEY="sec-retkeyhere"
+    MOXIE_WEB_URL="http://moxie.sunlightfoundation.com"
+
+
+Edit `/etc/systemd/system/moxie.service`, and let's just get something
+basic working here.
+
+    [Unit]
+    Description=moxie
+    Author=Paul R. Tagliamonte <tag@pault.ag>
+    Requires=docker.service
+    After=docker.service
+    
+    [Service]
+    Restart=always
+    ExecStart=/bin/bash -c '/usr/bin/docker start -a moxie || \
+        /usr/bin/docker run \
+            --privileged=true \
+            --name moxie \
+            -p 0.0.0.0:2222:2222/tcp \
+            -p 0.0.0.0:80:8888/tcp \
+            -e MOXIE_SLACKBOT_KEY=${MOXIE_SLACKBOT_KEY} \
+            -e DATABASE_URL=${DATABASE_URL} \
+            -e MOXIE_WEB_URL=${MOXIE_WEB_URL} \
+            -v /run/docker.sock:/run/docker.sock \
+            -v /srv/docker/moxie/moxie:/moxie/ \
+            paultag/moxie:latest moxied'
+    ExecStop=/usr/bin/docker stop -t 5 moxie
+    EnvironmentFile=/etc/docker/moxie.sh
+    
+    [Install]
+    WantedBy=multi-user.target
+
+Now, let's update
+
+    # systemctl daemon-reload
