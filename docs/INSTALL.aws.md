@@ -88,3 +88,21 @@ Now, let's verify the setup:
     Storage Driver: overlay
 
 
+Configuration for Moxie
+=======================
+
+I'm going to run the PostgreSQL db on the same host as the moxie runtime for
+now. Eventually this will change.
+
+    # apt-get install postgresql-9.4
+    # su postgres
+    % psql
+    postgres=# CREATE ROLE moxie WITH LOGIN PASSWORD 'moxie';
+    CREATE ROLE
+    postgres=# CREATE DATABASE moxie OWNER moxie;
+    CREATE DATABASE
+    postgres=# 
+
+Huzzah. Also, feel free to change your login information to not be that.
+
+
