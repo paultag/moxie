@@ -5,16 +5,17 @@ Installation for AWS Debian Jessie
 Security Groups
 ---------------
 
-Make sure port 80 is usable; same with port 2222, and in the SG for whatever
-it needs to talk with.
+Make sure port 80 is usable (for the web UI) and port 2222 (for the SSH
+management interface), and in the SGs for PostgreSQL and MongoDB servers as
+appropriate and necessary.
 
 
 Notes
 -----
 
-I highly encourage using Docker with Overlay, not aufs, nor devicemapper. This
-requires kernel 3.18+; so we'll have to fix that. Feel free to not do that
-and use aufs if you'd like.
+I highly encourage using Docker with `overlay`, not `aufs`, `btrfs`, nor
+`devicemapper`. This requires kernel 3.18+; so we'll have to fix that. Feel free
+to not do that and use `aufs` if you'd like.
 
 
 Initial Setup
@@ -63,10 +64,15 @@ Now mount:
     # ln -s /projects/docker /var/lib/docker
     # mkdir /projects/docker
 
-Yay. OK. So; let's get Docker installed.
+Yay. OK. So; let's get Docker installed. This is a little unorthodox because we
+need `overlay` support which is only in Docker 1.4+ and the `docker.io` package
+is still 1.3.3 (because of the Jessie freeze).  If you don't need overlay
+support (because you opted for `aufs`, `btrfs`, or `devicemapper`), you can skip
+the bit here where we download `docker-latest`.
 
     # apt-get install docker.io
     # usermod -a -G docker admin
+    $ # stop here if you don't need "overlay" :)
     $ wget https://get.docker.com/builds/Linux/x86_64/docker-latest -O docker
     $ chmod +x docker
     # cp docker /usr/bin/docker
