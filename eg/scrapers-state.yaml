@@ -12,6 +12,8 @@ jobs:
       image: "sunlightlabs/scrapers-us-state"
       env: "ocd"
       link: "ocd"
+      tags:
+          - "ocd"
 
 env-sets:
     - name: "ocd"

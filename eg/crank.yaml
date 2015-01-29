@@ -9,6 +9,9 @@ jobs:
       maintainer: "paultag@example.com"
       interval: 10
       # interval: 30
+      tags:
+          - "foo"
+          - "bar"
       command: "/opt/pault.ag/crank/eg/hy.hy"
       image: "paultag/crank"
       volumes: "crank"
