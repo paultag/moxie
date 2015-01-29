@@ -19,6 +19,7 @@
 # DEALINGS IN THE SOFTWARE.
 
 from sqlalchemy.orm import relationship
+from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import (Table, Column, ForeignKey, UniqueConstraint,
                         Integer, String, DateTime, Boolean, MetaData,
@@ -39,6 +40,7 @@ class Job(Base):
     interval = Column(Interval)
     active = Column(Boolean)
     manual = Column(Boolean)
+    tags = Column(postgresql.ARRAY(String(128))
 
     env_id = Column(Integer, ForeignKey('env_set.id'))
     env = relationship(
