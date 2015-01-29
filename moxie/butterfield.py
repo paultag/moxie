@@ -23,7 +23,7 @@ class LogService(EventService):
             "sleep": "{job} ready to run, launching in {time} seconds.",
         },
         "run": {
-            "pull": "Pulling {image} for {job}",
+            "pull": "Pulling from the index for {job}",
             "error": "Error! {job} - {error}",
             "create": "Creating a container for {job}",
             "starting": "Starting {job}",
