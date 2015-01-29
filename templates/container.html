@@ -1,5 +1,7 @@
 {% extends "interface.html" %}
 
+{% block title %}Container details for {{job.name}}{% endblock %}
+
 {% block head %}
     <script>
         var job = "{{job.name}}";

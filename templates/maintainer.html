@@ -1,5 +1,7 @@
 {% extends "interface.html" %}
 
+{% block title %}Jobs for {{maintainer.name}}{% endblock %}
+
 {% block content %}
   <h2 class="sub-header">{{maintainer.name}}'s Jobs <small><a href="mailto:{{maintainer.email}}">{{maintainer.email}}</a></small></h2>
 {% include "fragments/jobs.html" %}

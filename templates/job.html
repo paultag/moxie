@@ -1,5 +1,7 @@
 {% extends "interface.html" %}
 
+{% block title %}Job {{job.name}}{% endblock %}
+
 {% block content %}
     <h2>{{job.job_description}} <small>(<a href="/container/{{job.job_name}}/">{{job.job_name}}</a>)</small></h2>
     This job is maintained by
