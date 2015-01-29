@@ -40,7 +40,7 @@ class Job(Base):
     interval = Column(Interval)
     active = Column(Boolean)
     manual = Column(Boolean)
-    tags = Column(postgresql.ARRAY(String(128))
+    tags = Column(postgresql.ARRAY(String(128)))
 
     env_id = Column(Integer, ForeignKey('env_set.id'))
     env = relationship(
