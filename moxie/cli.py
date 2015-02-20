@@ -33,7 +33,8 @@ def serve():
 
     from moxie.cores import (RunService, LogService,
                              CronService, ReapService,
-                             DatabaseService, ContainerService, SSHService)
+                             DatabaseService, ContainerService, SSHService,
+                             AlertService)
 
     loop = asyncio.get_event_loop()
 
@@ -51,12 +52,16 @@ def serve():
             # events(bot)
         )
 
+    alert = AlertService()
+
     run = RunService()
     ssh = SSHService()
     cron = CronService()
     reap = ReapService()
     db = DatabaseService()
     container = ContainerService()
+
+    # alert.register(SMTPHandler(**secrets))
 
     socket_fp = os.environ.get("MOXIE_SOCKET", None)
     if socket_fp:

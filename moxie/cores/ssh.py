@@ -325,6 +325,8 @@ class SSHService(Service):
     @asyncio.coroutine
     def __call__(self):
         database = Service.resolve("moxie.cores.database.DatabaseService")
+        # self.alert = CronService.resolve("moxie.cores.alert.AlertService")
+        # register an ssh callback for each thinger
         ssh_host_keys = asyncssh.read_private_key_list('ssh_host_keys')
 
         if MoxieSSHServer._keys is None:

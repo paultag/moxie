@@ -25,6 +25,10 @@ from aiocore import Service
 class AlertService(Service):
     identifier = "moxie.cores.alert.AlertService"
 
+    def __init__(self):
+        self.callbacks = []
+        super(AlertService, self).__init__()
+
     @asyncio.coroutine
     def starting(self, job):
         yield from self._emit("starting", job=job)
@@ -61,4 +65,4 @@ class AlertService(Service):
 
     @asyncio.coroutine
     def __call__(self):
-        self.callbacks = []
+        pass

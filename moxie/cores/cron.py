@@ -48,6 +48,7 @@ class CronService(Service):
         self.logger = CronService.resolve("moxie.cores.log.LogService")
         self.run = CronService.resolve("moxie.cores.run.RunService")
         self.database = CronService.resolve("moxie.cores.database.DatabaseService")
+        self.alert = CronService.resolve("moxie.cores.alert.AlertService")
 
         while True:
             jobs = (yield from self.database.job.list(

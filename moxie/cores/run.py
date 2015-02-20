@@ -147,6 +147,7 @@ class RunService(EventService):
         self.database = EventService.resolve(
             "moxie.cores.database.DatabaseService")
         self.logger = EventService.resolve("moxie.cores.log.LogService")
+        self.alert = EventService.resolve("moxie.cores.alert.AlertService")
 
         job = yield from self.database.job.get(job)
         if job is None:
@@ -159,7 +160,9 @@ class RunService(EventService):
                 yield from self.log('error', job=job.name, error="already active")
                 return
 
+            yield from self.alert.starting(job.name)
             yield from self.log('starting', job=job.name)
             yield from self._bringup(job)
             yield from self._start(job)
+            yield from self.alert.running(job.name)
             yield from self.log('started', job=job.name)

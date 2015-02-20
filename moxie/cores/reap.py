@@ -54,6 +54,7 @@ class ReapService(EventService):
             )
             yield from self.database.job.complete(job.name)
             yield from self.log('punted', job=job.name)
+            yield from self.alert.error(job.name, -1)
             return
 
         state = container._container.get("State", {})
@@ -77,9 +78,15 @@ class ReapService(EventService):
             start_time=start_time,
             end_time=end_time
         )
+
         yield from self.database.job.complete(job.name)
         yield from self.log('complete', record=runid, job=job.name)
         yield from self.containers.delete(job.name)
+
+        if exit == 0:
+            yield from self.alert.success(job.name, exit)
+        else:
+            yield from self.alert.failure(job.name, exit)
 
 
     @asyncio.coroutine
@@ -90,6 +97,7 @@ class ReapService(EventService):
             "moxie.cores.container.ContainerService")
         self.logger = EventService.resolve("moxie.cores.log.LogService")
         self.run = EventService.resolve("moxie.cores.run.RunService")
+        self.alert = EventService.resolve("moxie.cores.alert.AlertService")
 
         while True:
             jobs = (yield from self.database.job.list(Job.active == True))
