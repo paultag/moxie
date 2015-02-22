@@ -1,0 +1,8 @@
+To: {{to}}
+From: "{{user_name}}" <{{user}}>
+Subject: {{subject}}
+X-Moxie-Version: FIXME
+
+Howdy there {{maintainer.name}},
+
+{{job.name}} totally failed.

@@ -18,31 +18,55 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
+import os
 import asyncio
 import smtplib
+
+import jinja2
+from aiocore import Service
+from aiomultiprocessing import AsyncProcess
+
+
+_jinja_env = jinja2.Environment(
+    loader=jinja2.FileSystemLoader(os.path.join(
+        os.path.abspath(os.path.dirname(__file__)),
+        '..', '..',
+        'templates'
+    ))
+)
 
 
 class EmailAlert:
     def __init__(self, host, user, password):
+        self.db = Service.resolve("moxie.cores.database.DatabaseService")
         self.host = host
         self.user = user
         self.password = password
 
-    @asyncio.coroutine
-    def __call__(self, payload):
-        TO = 'paultag@gmail.com'
-        SUBJECT = 'TEST MAIL'
-        TEXT = 'Here is a message from python.'
-
+    def send(self, payload, job, maintainer):
         server = smtplib.SMTP(self.host, 587)
         server.ehlo()
         server.starttls()
         server.login(self.user, self.password)
 
-        BODY = '\r\n'.join(['To: %s' % TO,
-                            'From: "{}" <{}>'.format("Moxie!", self.user),
-                            'Subject: %s' % SUBJECT,
-                            '', TEXT])
+        type_ = payload['type']
 
-        server.sendmail(self.user, [TO], BODY)
+        to = maintainer.email
+
+        template = _jinja_env.get_template("emails/{}.email".format(type_))
+        body = template.render(to=to, user_name="Moxie",
+                               user=self.user, subject="😱",
+                               maintainer=maintainer, job=job)
+        body = body.encode()  # Ready to send it over the line.
+
+        server.sendmail(self.user, [to], body)
         server.quit()
+
+    @asyncio.coroutine
+    def __call__(self, payload):
+        job = yield from self.db.job.get(payload.get("job"))
+        maintainer = yield from self.db.maintainer.get(job.maintainer_id)
+
+        p = AsyncProcess(target=self.send, args=(payload, job, maintainer))
+        p.start()
+        yield from p.join()

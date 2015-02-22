@@ -25,7 +25,7 @@ from aiocore import Service
 from sqlalchemy import update, insert, select, and_
 
 from moxie.core import DATABASE_URL
-from moxie.models import Job, Run, Env, Volume, User
+from moxie.models import Job, Run, Env, Volume, User, Maintainer
 
 
 def guard(fn):
@@ -56,6 +56,7 @@ class DatabaseService(Service):
         self.env = DatabaseService.EnvDB(self)
         self.volume = DatabaseService.VolumeDB(self)
         self.user = DatabaseService.UserDB(self)
+        self.maintainer = DatabaseService.MaintainerDB(self)
 
     class RunDB:
         def __init__(self, db):
@@ -107,6 +108,20 @@ class DatabaseService(Service):
                 ]).where(User.fingerprint==fingerprint))
                 user = yield from users.first()
                 return user
+
+    class MaintainerDB:
+        def __init__(self, db):
+            self.db = db
+
+        @guard
+        @asyncio.coroutine
+        def get(self, id):
+            with (yield from self.db.engine) as conn:
+                jobs = yield from conn.execute(select(
+                    [Maintainer.__table__]).where(Maintainer.id == id)
+                )
+                job = yield from jobs.first()
+                return job
 
     class JobDB:
         def __init__(self, db):
