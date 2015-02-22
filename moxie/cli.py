@@ -35,30 +35,32 @@ def serve():
                              CronService, ReapService,
                              DatabaseService, ContainerService, SSHService,
                              AlertService)
-    from moxie.alerts import EmailAlert
+    from moxie.alerts import EmailAlert, SlackAlert
 
     loop = asyncio.get_event_loop()
 
     botcoro = asyncio.gather()
     bot_key = os.environ.get("MOXIE_SLACKBOT_KEY", None)
+
     log = LogService()
+    db = DatabaseService()
+    alert = AlertService()
 
     if bot_key:
         bot = Bot(bot_key)
         bot.listen("moxie.butterfield.run")
 
         log = ButterfieldLogService(bot)
+        alert.register(SlackAlert(bot))
         botcoro = asyncio.gather(
             bot(),
             # events(bot)
         )
 
-    alert = AlertService()
     run = RunService()
     ssh = SSHService()
     cron = CronService()
     reap = ReapService()
-    db = DatabaseService()
     container = ContainerService()
 
     if os.environ.get("MOXIE_SMTP_HOST", False) is not False:
