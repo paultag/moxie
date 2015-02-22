@@ -1,4 +1,5 @@
 aiocore
+aiomultiprocessing
 asyncssh
 cryptography
 aiopg

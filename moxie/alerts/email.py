@@ -19,45 +19,30 @@
 # DEALINGS IN THE SOFTWARE.
 
 import asyncio
-from aiocore import Service
+import smtplib
 
 
-class AlertService(Service):
-    identifier = "moxie.cores.alert.AlertService"
-
-    def __init__(self):
-        self.callbacks = []
-        super(AlertService, self).__init__()
-
-    @asyncio.coroutine
-    def starting(self, job):
-        yield from self._emit("starting", job=job)
+class EmailAlert:
+    def __init__(self, host, user, password):
+        self.host = host
+        self.user = user
+        self.password = password
 
     @asyncio.coroutine
-    def running(self, job):
-        yield from self._emit("running", job=job)
+    def __call__(self, payload):
+        TO = 'paultag@gmail.com'
+        SUBJECT = 'TEST MAIL'
+        TEXT = 'Here is a message from python.'
 
-    @asyncio.coroutine
-    def success(self, job, result):
-        yield from self._emit("success", job=job, result=result)
+        server = smtplib.SMTP(self.host, 587)
+        server.ehlo()
+        server.starttls()
+        server.login(self.user, self.password)
 
-    @asyncio.coroutine
-    def failure(self, job, result):
-        yield from self._emit("failure", job=job, result=result)
+        BODY = '\r\n'.join(['To: %s' % TO,
+                            'From: "{}" <{}>'.format("Moxie!", self.user),
+                            'Subject: %s' % SUBJECT,
+                            '', TEXT])
 
-    @asyncio.coroutine
-    def error(self, job, result):
-        yield from self._emit("error", job=job, result=result)
-
-    def register(self, callback):
-        self.callbacks.append(callback)
-
-    @asyncio.coroutine
-    def _emit(self, flavor, **kwargs):
-        kwargs['type'] = flavor
-        for handler in self.callbacks:
-            asyncio.async(handler(kwargs))
-
-    @asyncio.coroutine
-    def __call__(self):
-        pass
+        server.sendmail(self.user, [TO], BODY)
+        server.quit()

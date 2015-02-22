@@ -35,6 +35,7 @@ def serve():
                              CronService, ReapService,
                              DatabaseService, ContainerService, SSHService,
                              AlertService)
+    from moxie.alerts import EmailAlert
 
     loop = asyncio.get_event_loop()
 
