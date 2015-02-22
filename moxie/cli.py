@@ -67,7 +67,7 @@ def serve():
         os.environ.get("MOXIE_SMTP_USER", None),
         os.environ.get("MOXIE_SMTP_PASS", None),
     ))
-    # loop.run_until_complete(alert.failure("test", 1))
+    loop.run_until_complete(alert.failure("test", 1))
 
     socket_fp = os.environ.get("MOXIE_SOCKET", None)
     if socket_fp:

@@ -37,6 +37,8 @@ _jinja_env = jinja2.Environment(
 
 
 class EmailAlert:
+    TYPES = ['failure']
+
     def __init__(self, host, user, password):
         self.db = Service.resolve("moxie.cores.database.DatabaseService")
         self.host = host
@@ -44,25 +46,28 @@ class EmailAlert:
         self.password = password
 
     def send(self, payload, job, maintainer):
+        type_ = payload['type']
+
         server = smtplib.SMTP(self.host, 587)
         server.ehlo()
         server.starttls()
         server.login(self.user, self.password)
 
-        type_ = payload['type']
-        to = maintainer.email
-
         template = _jinja_env.get_template("emails/{}.email".format(type_))
-        body = template.render(to=to, user_name="Moxie",
-                               user=self.user, subject="😱",
+        body = template.render(user_name="Moxie",
+                               user=self.user,
                                maintainer=maintainer, job=job)
         body = body.encode()  # Ready to send it over the line.
 
-        server.sendmail(self.user, [to], body)
+        server.sendmail(self.user, [maintainer.email], body)
         server.quit()
 
     @asyncio.coroutine
     def __call__(self, payload):
+        type_ = payload['type']
+        if type_ not in self.TYPES:
+            return
+
         job = yield from self.db.job.get(payload.get("job"))
         maintainer = yield from self.db.maintainer.get(job.maintainer_id)
 

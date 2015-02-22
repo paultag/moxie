@@ -1,6 +1,6 @@
-To: {{to}}
+To: "{{maintainer.name}}" {{maintainer.email}}
 From: "{{user_name}}" <{{user}}>
-Subject: {{subject}}
+Subject: 😱 {{job.name}} failed!
 X-Moxie-Version: FIXME
 
 Howdy there {{maintainer.name}},
