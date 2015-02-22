@@ -54,7 +54,6 @@ def serve():
         )
 
     alert = AlertService()
-
     run = RunService()
     ssh = SSHService()
     cron = CronService()
@@ -62,11 +61,12 @@ def serve():
     db = DatabaseService()
     container = ContainerService()
 
-    alert.register(EmailAlert(
-        os.environ.get("MOXIE_SMTP_HOST", None),
-        os.environ.get("MOXIE_SMTP_USER", None),
-        os.environ.get("MOXIE_SMTP_PASS", None),
-    ))
+    if os.environ.get("MOXIE_SMTP_HOST", False) is not False:
+        alert.register(EmailAlert(
+            os.environ.get("MOXIE_SMTP_HOST", None),
+            os.environ.get("MOXIE_SMTP_USER", None),
+            os.environ.get("MOXIE_SMTP_PASS", None),
+        ))
 
     socket_fp = os.environ.get("MOXIE_SOCKET", None)
     if socket_fp:
