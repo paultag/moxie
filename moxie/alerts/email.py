@@ -50,7 +50,6 @@ class EmailAlert:
         server.login(self.user, self.password)
 
         type_ = payload['type']
-
         to = maintainer.email
 
         template = _jinja_env.get_template("emails/{}.email".format(type_))
