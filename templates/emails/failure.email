@@ -1,4 +1,4 @@
-To: "{{maintainer.name}}" {{maintainer.email}}
+To: "{{maintainer.name}}" <{{maintainer.email}}>
 From: "{{user_name}}" <{{user}}>
 Subject: 😱 {{job.name}} failed!
 X-Moxie-Version: FIXME
