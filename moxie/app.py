@@ -36,6 +36,23 @@ app = MoxieApp()
 docker = Docker()
 
 
+@asyncio.coroutine
+def get_logs(conn, job, limit=10):
+    runs = yield from conn.execute(select(
+        [Run.__table__]).where(Run.job_id == job.id).limit(limit)
+    )
+    return runs
+
+
+@asyncio.coroutine
+def get_jobs(conn, jobs, limit=10):
+    ret = []
+    for job in jobs:
+        ret.append((job, (yield from get_logs(conn, job, limit=limit))))
+    return ret
+
+
+
 @app.websocket("^websocket/stream/(?P<name>.*)/$")
 def stream(request, name):
     container = Service.resolve("moxie.cores.container.ContainerService")
@@ -59,7 +76,7 @@ def jobs(request):
     with (yield from engine) as conn:
         res = yield from conn.execute(Job.__table__.select())
         return request.render('jobs.html', {
-            "jobs": res,
+            "jobs": (yield from get_jobs(conn, res)),
         })
 
 @app.register("^run/(?P<key>.*)/$")
@@ -100,7 +117,7 @@ def maintainers(request, id):
 
         return request.render('maintainer.html', {
             "maintainer": maintainer,
-            "jobs": jobs
+            "jobs": (yield from get_jobs(conn, jobs)),
         })
 
 

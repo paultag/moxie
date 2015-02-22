@@ -4,13 +4,23 @@
         <tr>
           <th>Job ID</th>
           <th>Description</th>
+          <th>Runs</th>
         </tr>
       </thead>
       <tbody>
-{% for job in jobs %}
+{% for (job, runs) in jobs %}
         <tr {% if job.active %}class="success"{% else %}{% endif %} >
           <td><a href="/job/{{job.name}}/" >{{job.name}}</a></td>
           <td>{{job.description}}</td>
+          <td>
+              {% for run in runs %}
+                  {% if run.failed %}
+                    ✘
+                  {% else %}
+                    ✓ 
+                  {% endif %}
+              {% endfor %}
+          </td>
         </tr>
 {% endfor %}
       </tbody>
