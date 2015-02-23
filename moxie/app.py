@@ -25,7 +25,7 @@ from aiodocker.docker import Docker
 
 import json
 import humanize.time
-from sqlalchemy import select, join
+from sqlalchemy import select, join, desc
 from moxie.server import MoxieApp
 from moxie.models import Job, Maintainer, Run
 from moxie.core import DATABASE_URL
@@ -39,8 +39,11 @@ docker = Docker()
 @asyncio.coroutine
 def get_logs(conn, job, limit=10):
     runs = yield from conn.execute(select(
-        [Run.__table__]).where(Run.job_id == job.id).limit(limit).order_by(
-            Run.start_time))
+        [Run.__table__]).where(
+            Run.job_id == job.id
+        ).order_by(
+            desc(Run.start_time)
+        ).limit(limit))
     return runs
 
 
