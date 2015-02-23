@@ -76,7 +76,7 @@ class DatabaseService(Service):
             with (yield from self.db.engine) as conn:
                 runs = yield from conn.execute(select([
                     Run.__table__]).where(Run.id==run_id))
-                return runs.first()
+                return (yield from runs.first())
 
     class VolumeDB:
         def __init__(self, db):
