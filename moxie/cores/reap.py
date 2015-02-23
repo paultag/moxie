@@ -54,7 +54,7 @@ class ReapService(EventService):
             )
             yield from self.database.job.complete(job.name)
             yield from self.log('punted', job=job.name)
-            yield from self.alert.error(job.name, -1)
+            yield from self.alert.error(job.name, runid)
             return
 
         state = container._container.get("State", {})
@@ -84,9 +84,9 @@ class ReapService(EventService):
         yield from self.containers.delete(job.name)
 
         if exit == 0:
-            yield from self.alert.success(job.name, exit)
+            yield from self.alert.success(job.name, runid)
         else:
-            yield from self.alert.failure(job.name, exit)
+            yield from self.alert.failure(job.name, runid)
 
 
     @asyncio.coroutine

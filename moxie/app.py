@@ -39,8 +39,8 @@ docker = Docker()
 @asyncio.coroutine
 def get_logs(conn, job, limit=10):
     runs = yield from conn.execute(select(
-        [Run.__table__]).where(Run.job_id == job.id).limit(limit)
-    )
+        [Run.__table__]).where(Run.job_id == job.id).limit(limit).order_by(
+            Run.start_time))
     return runs
 
 

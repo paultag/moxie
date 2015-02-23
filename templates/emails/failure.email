@@ -3,6 +3,20 @@ From: "{{user_name}}" <{{user}}>
 Subject: 😱 {{job.name}} failed!
 X-Moxie-Version: FIXME
 
-Howdy there {{maintainer.name}},
+Yo, {{maintainer.name}},
 
-{{job.name}} totally failed.
+{{job.name}} totally failed. The run started at {{run.start_time}} and
+ended at {{run.end_time}}.
+
+If you want to check it out, there's some information at
+{{root}}/run/{{run.id}}/
+
+
+Thanks, homie!
+  Moxie
+
+
+Some log action:
+
+
+{{run.log}}

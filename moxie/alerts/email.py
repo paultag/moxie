@@ -35,6 +35,8 @@ _jinja_env = jinja2.Environment(
     ))
 )
 
+MOXIE_WEB_URL = os.environ.get("MOXIE_WEB_URL", "http://localhost:8888")
+
 
 class EmailAlert:
     TYPES = ['failure']
@@ -45,7 +47,7 @@ class EmailAlert:
         self.user = user
         self.password = password
 
-    def send(self, payload, job, maintainer):
+    def send(self, payload, job, maintainer, run):
         type_ = payload['type']
 
         server = smtplib.SMTP(self.host, 587)
@@ -56,7 +58,10 @@ class EmailAlert:
         template = _jinja_env.get_template("emails/{}.email".format(type_))
         body = template.render(user_name="Moxie",
                                user=self.user,
-                               maintainer=maintainer, job=job)
+                               root=MOXIE_WEB_URL,
+                               maintainer=maintainer,
+                               job=job,
+                               run=run)
         body = body.encode()  # Ready to send it over the line.
 
         server.sendmail(self.user, [maintainer.email], body)
@@ -70,7 +75,11 @@ class EmailAlert:
 
         job = yield from self.db.job.get(payload.get("job"))
         maintainer = yield from self.db.maintainer.get(job.maintainer_id)
+        runid = payload.get("result", None)
+        run = None
+        if runid:
+            run = yield from self.db.run.get(runid)
 
-        p = AsyncProcess(target=self.send, args=(payload, job, maintainer))
+        p = AsyncProcess(target=self.send, args=(payload, job, maintainer, run))
         p.start()
         yield from p.join()

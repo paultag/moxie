@@ -70,6 +70,14 @@ class DatabaseService(Service):
                     **kwargs))
             return runid
 
+        @guard
+        @asyncio.coroutine
+        def get(self, run_id):
+            with (yield from self.db.engine) as conn:
+                runs = yield from conn.execute(select([
+                    Run.__table__]).where(Run.id==run_id))
+                return runs.first()
+
     class VolumeDB:
         def __init__(self, db):
             self.db = db
