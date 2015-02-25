@@ -4,9 +4,17 @@
 
 {% block content %}
     <h2>{{job.job_description}} <small>(<a href="/container/{{job.job_name}}/">{{job.job_name}}</a>)</small></h2>
+
+    <p>
+    {% if job.job_tags %}
+    {% for tag in job.job_tags %}
+        <span class="label label-info">{{tag}}</span>
+    {% endfor %}
+    {% endif %}
+    </p>
+
     This job is maintained by
     <a href="/maintainer/{{job.maintainer_id}}/">{{job.maintainer_name}}</a>.
-
     <p>
     {% if job.job_manual %}
     This is a manual job. Please schedule this to run via SSH.
