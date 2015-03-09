@@ -180,3 +180,7 @@ def container(request, name):
             "container": container,
             "info": info,
         })
+
+@app.register("^dashboard/$")
+def container(request):
+    return request.render('dashboard.html', {})
