@@ -82,7 +82,7 @@ def serve():
         coro = loop.create_server(app, sock=server)
     else:
         host = os.environ.get("MOXIE_HOST", "127.0.0.1")
-        port = int(os.environ.get("MOXIE_PORT", "8888"))
+        port = int(os.environ.get("MOXIE_PORT", "8000"))
         coro = loop.create_server(app, host, port)
 
     server = loop.run_until_complete(coro)
