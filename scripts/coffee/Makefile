@@ -1,4 +1,4 @@
-COFFEE_SCRIPTS = container.min.js dashboard.min.js
+COFFEE_SCRIPTS = container.min.js dashboard.min.js cast-sender.min.js
 
 .SUFFIXES:
 .SUFFIXES: .coffee .js .min.js
