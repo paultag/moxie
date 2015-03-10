@@ -180,3 +180,34 @@ def container(request, name):
             "container": container,
             "info": info,
         })
+
+
+##########################
+#  "API" Endpoint methods.
+##########################
+API_PAYLOAD_LIMIT = 100
+
+
+def response(request, data):
+    code = 200
+    headers = [("Content-Type", "application/json"),]
+    response = request.make_response(code, *headers)
+    response.write(bytes(json.dumps(data), 'utf-8'))
+    response.write_eof()
+    return response
+
+@app.register("^api/v1/runs/$")
+def runs(request):
+    engine = yield from aiopg.sa.create_engine(DATABASE_URL)
+    with (yield from engine) as conn:
+        runs = yield from conn.execute(select([Run.__table__]).order_by(
+            desc(Run.start_time)).limit(API_PAYLOAD_LIMIT))
+
+    def to_dict(run):
+        return {"id": run.id,
+                "failed": run.failed,
+                "job_id": run.job_id,
+                "start_time": run.start_time.isoformat(),
+                "end_time": run.end_time.isoformat()}
+
+    return response(request, list(map(to_dict, runs)))
