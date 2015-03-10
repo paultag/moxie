@@ -4,6 +4,7 @@ How to set up Moxie for local development
  * Make a Python 3 virtualenv
  * `pip install -r requirements.txt`
  * `python setup.py develop`
+ * `make` to build JS / Less
  * Setup PostgreSQL:
 
 ```
