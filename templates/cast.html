@@ -1,0 +1,17 @@
+{% include "base.html" %}
+
+{% block base_head %}
+
+{% endblock %}
+
+
+{% block base_content %}
+{% for run in runs %}
+
+<div>
+    <h1>Run #{{run.run_id}} -- {{run.job_name}}</h1>
+    <h3>It's {{run.run_failed}}, this job failed.</h3>
+<div>
+
+{% endfor %}
+{% endblock %}

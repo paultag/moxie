@@ -186,8 +186,16 @@ def container(request, name):
 def container(request):
     engine = yield from aiopg.sa.create_engine(DATABASE_URL)
     with (yield from engine) as conn:
-        runs = list((yield from conn.execute(select(
-            [Run.__table__]).order_by(desc(Run.start_time)).limit(5))))
+        runs = yield from conn.execute(select(
+            [Run.__table__, Job.__table__,],
+            use_labels=True
+        ).select_from(join(
+            Run.__table__,
+            Job.__table__,
+            Run.job_id == Job.id
+        )).order_by(desc(Run.start_time)).limit(10))
+        runs = list(runs)
+
     return request.render('cast.html', {
         "runs": runs
     })
