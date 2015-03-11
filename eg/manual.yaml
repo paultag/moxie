@@ -12,6 +12,7 @@ jobs:
       image: "sunlightlabs/openstates"
       tags:
           - "quix"
+          - "slack:#vcs"
       description: "quick test"
       maintainer: "paultag@example.com"
       manual: true
@@ -19,3 +20,4 @@ jobs:
       image: "debian:unstable"
       tags:
           - "fnord"
+          - "slack:#test"

@@ -39,8 +39,11 @@ class SlackAlert:
     def __call__(self, payload):
         job = yield from self.db.job.get(payload.get("job"))
         maintainer = yield from self.db.maintainer.get(job.maintainer_id)
+        channels = filter(lambda x: x.startswith("slack:"), job.tags)
 
         fmt = self.strings[payload["type"]]
-        yield from self.bot.post(
-            "#cron",
-            fmt.format(job=job, maintainer=maintainer))
+
+        for channel in (['slack:#cron'] + list(channels)):
+            channel = channel.replace("slack:", "")
+            yield from self.bot.post(
+                channel, fmt.format(job=job, maintainer=maintainer))
