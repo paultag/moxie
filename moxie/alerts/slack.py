@@ -24,7 +24,7 @@ from aiocore import Service
 
 class SlackAlert:
     strings = {
-        "starting": "{job.name} is starting.",
+        # "starting": "{job.name} is starting.",
         "running": "{job.name} is running.",
         "success": "{job.name} has completed successfully.",
         "error": "{job.name} had an error.",
@@ -41,7 +41,9 @@ class SlackAlert:
         maintainer = yield from self.db.maintainer.get(job.maintainer_id)
         channels = filter(lambda x: x.startswith("slack:"), job.tags)
 
-        fmt = self.strings[payload["type"]]
+        fmt = self.strings.get(payload["type"])
+        if fmt is None:
+            return
 
         for channel in (['slack:#cron'] + list(channels)):
             channel = channel.replace("slack:", "")
