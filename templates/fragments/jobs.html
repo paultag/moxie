@@ -20,12 +20,12 @@
               {% endfor %}
               {% endif %}
           </td>
-          <td>
+          <td class='runs'>
               {% for run in runs %}
                   {% if run.failed %}
-                    ✘
+              <span class='failed'>✘</span>
                   {% else %}
-                    ✓ 
+              <span class='success'>✓</span>
                   {% endif %}
               {% endfor %}
           </td>
