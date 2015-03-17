@@ -114,4 +114,8 @@ FACTS = [
     "Error. Error. Error. Fact not found.",
     "Fact not found.",
     "Warning, sphere corruption at twenty-- rats cannot throw up.",
+
+    "Statistically speaking, at least one 'person' on this train is actually 7 squirrels wearing a human suit. Don't be a victim.",
+    "Squirrels live in trees. Bees live in trees. Are squirrels actually killer bees...in disguise???",
+    "Squirrels have never, ever wished you a Happy Birthday. Like, not even once. Probably because squirrels are inconsiderate, selfish monsters.",
 ]
