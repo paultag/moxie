@@ -69,7 +69,8 @@ class ReapService(EventService):
         end_time = dateutil.parser.parse(state.get("FinishedAt"))
 
         log = yield from container.log(stdout=True, stderr=True)
-        log = log.decode('utf-8')
+        # log = log.decode('utf-8')
+        log = log.decode('ascii', 'replace')
 
         runid = yield from self.database.run.create(
             failed=True if exit != 0 else False,
