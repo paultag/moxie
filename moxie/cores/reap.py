@@ -70,7 +70,7 @@ class ReapService(EventService):
 
         log = yield from container.log(stdout=True, stderr=True)
         # log = log.decode('utf-8')
-        log = log.decode('ascii', 'replace')
+        log = log.decode('ascii', 'ignore')
 
         runid = yield from self.database.run.create(
             failed=True if exit != 0 else False,
