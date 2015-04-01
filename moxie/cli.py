@@ -268,9 +268,8 @@ def load():
 
                 job["%s_id" % (k)] = ro.id
 
-            job['scheduled'] = dt.datetime.utcnow()
-
             if o is None:
+                job['scheduled'] = dt.datetime.utcnow()
                 j = Job(active=False, **job)
                 print("Inserting: ", job['name'])
                 session.add(j)
