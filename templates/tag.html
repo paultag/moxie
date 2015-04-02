@@ -1,0 +1,8 @@
+{% extends "interface.html" %}
+
+{% block title %}Jobs for {{tag}}{% endblock %}
+
+{% block content %}
+<h2 class="sub-header">Jobs tagged {{tag}}</h2>
+{% include "fragments/jobs.html" %}
+{% endblock %}

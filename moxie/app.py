@@ -124,6 +124,20 @@ def maintainers(request, id):
         })
 
 
+@app.register("^tag/(?P<id>.*)/$")
+def tag(request, id):
+    engine = yield from aiopg.sa.create_engine(DATABASE_URL)
+    with (yield from engine) as conn:
+        jobs = yield from conn.execute(select([Job.__table__]).where(
+            Job.tags.contains([id])
+        ))
+
+        return request.render('tag.html', {
+            "tag": id,
+            "jobs": (yield from get_jobs(conn, jobs)),
+        })
+
+
 @app.register("^job/(?P<name>.*)/$")
 def job(request, name):
     engine = yield from aiopg.sa.create_engine(DATABASE_URL)
