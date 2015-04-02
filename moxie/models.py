@@ -40,7 +40,7 @@ class Job(Base):
     interval = Column(Interval)
     active = Column(Boolean)
     manual = Column(Boolean)
-    tags = Column(postgresql.ARRAY(String(128)))
+    tags = Column(postgresql.ARRAY(Text))
 
     trigger_id = Column(Integer, ForeignKey('job.id'))
     trigger = relationship("Job", foreign_keys=[trigger_id])
