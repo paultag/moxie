@@ -42,6 +42,9 @@ class Job(Base):
     manual = Column(Boolean)
     tags = Column(postgresql.ARRAY(String(128)))
 
+    trigger_id = Column(Integer, ForeignKey('job.id'))
+    trigger = relationship("Job", foreign_keys=[trigger_id])
+
     env_id = Column(Integer, ForeignKey('env_set.id'))
     env = relationship(
         "EnvSet",

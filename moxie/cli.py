@@ -268,6 +268,16 @@ def load():
 
                 job["%s_id" % (k)] = ro.id
 
+            trigger = job.pop('trigger', None)
+            if trigger is not None:
+                parent = get_one(Job, Job.name == trigger)
+                if parent is None:
+                    raise ValueError(
+                        "Error: No such job %s (trigger for %s)" % (
+                            trigger, job['name']
+                        ))
+                job['trigger_id'] = parent.id
+
             if o is None:
                 job['scheduled'] = dt.datetime.utcnow()
                 j = Job(active=False, **job)
