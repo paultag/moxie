@@ -155,6 +155,15 @@ class DatabaseService(Service):
 
         @guard
         @asyncio.coroutine
+        def triggered(self, name):
+            job = (yield from self.get(name))
+            q = select([Job.__table__]).where(Job.trigger_id == job.id)
+            with (yield from self.db.engine) as conn:
+                jobs = (yield from conn.execute(q))
+            return jobs
+
+        @guard
+        @asyncio.coroutine
         def get(self, name):
             with (yield from self.db.engine) as conn:
                 jobs = yield from conn.execute(select(
