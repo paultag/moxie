@@ -16,7 +16,7 @@
           <td>
               {% if job.tags %}
               {% for tag in job.tags %}
-                  <span class="label label-info">{{tag}}</span>
+                  <span class="label label-info"><a href="/tag/{{tag}}/">{{tag}}</a></span>
               {% endfor %}
               {% endif %}
           </td>
