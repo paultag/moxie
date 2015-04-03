@@ -84,15 +84,14 @@ class ReapService(EventService):
         yield from self.log('complete', record=runid, job=job.name)
         yield from self.containers.delete(job.name)
 
-        for needs_run in (yield from self.database.job.triggered(job.name)):
-            # For the next few jobs, let's spin off a run, this would deadlock
-            # if we yielded from that job.
-            asyncio.async(self.run.run(
-                needs_run.name,
-                'triggered from {name}'.format(name=job.name)
-            ))
-
         if exit == 0:
+            for needs_run in (yield from self.database.job.triggered(job.name)):
+                # For the next few jobs, let's spin off a run, this would deadlock
+                # if we yielded from that job.
+                asyncio.async(self.run.run(
+                    needs_run.name,
+                    'triggered from {name}'.format(name=job.name)
+                ))
             yield from self.alert.success(job.name, runid)
         else:
             yield from self.alert.failure(job.name, runid)
