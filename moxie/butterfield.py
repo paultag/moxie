@@ -27,7 +27,7 @@ class LogService(EventService):
             "error": "Error! {job} - {error}",
             "create": "Creating a container for {job}",
             "starting": "Starting {job} because {why}",
-            "started": "Job {{job}} started! ({}/container/{{job}}/) because {why}".format(WEB_ROOT),
+            "started": "Job {{job}} started! ({}/container/{{job}}/) because {{why}}".format(WEB_ROOT),
         },
         "reap": {
             "error": "Error! {job} - {error}",
