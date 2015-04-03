@@ -41,7 +41,7 @@ class CronService(Service):
         seconds = 0 if seconds < 0 else seconds
         yield from self.log('sleep', time=seconds, job=job.name)
         yield from asyncio.sleep(seconds)
-        yield from self.run.run(job.name)
+        yield from self.run.run(job.name, 'cron')
 
     @asyncio.coroutine
     def __call__(self):

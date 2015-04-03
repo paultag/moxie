@@ -127,7 +127,7 @@ def run(stdin, stdout, stderr, *, args=None):
     stdout.write("Starting job %s...\r\n" % (name))
 
     try:
-        yield from run.run(name)
+        yield from run.run(name, 'ssh')
     except ValueError as e:
         stderr.write(str(e))
         return

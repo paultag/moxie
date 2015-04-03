@@ -26,8 +26,8 @@ class LogService(EventService):
             "pull": "Pulling from the index for {job}",
             "error": "Error! {job} - {error}",
             "create": "Creating a container for {job}",
-            "starting": "Starting {job}",
-            "started": "Job {{job}} started! ({}/container/{{job}}/)".format(WEB_ROOT),
+            "starting": "Starting {job} because {why}",
+            "started": "Job {{job}} started! ({}/container/{{job}}/) because {why}".format(WEB_ROOT),
         },
         "reap": {
             "error": "Error! {job} - {error}",
@@ -100,7 +100,10 @@ def run(bot, message: "message"):
             message['channel'], "<@{}>: Doing bringup of {}".format(
                 message['user'], job))
         try:
-            yield from runner.run(job)
+            yield from runner.run(
+                job,
+                'slack from <@{}>'.format(message['user'])
+            )
         except ValueError as e:
             yield from bot.post(
                 message['channel'],

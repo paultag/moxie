@@ -141,7 +141,7 @@ class RunService(EventService):
         return container
 
     @asyncio.coroutine
-    def run(self, job):
+    def run(self, job, why):
         self.containers = EventService.resolve(
             "moxie.cores.container.ContainerService")
         self.database = EventService.resolve(
@@ -161,8 +161,8 @@ class RunService(EventService):
                 return
 
             yield from self.alert.starting(job.name)
-            yield from self.log('starting', job=job.name)
+            yield from self.log('starting', job=job.name, why=why)
             yield from self._bringup(job)
             yield from self._start(job)
             yield from self.alert.running(job.name)
-            yield from self.log('started', job=job.name)
+            yield from self.log('started', job=job.name, why=why)
