@@ -113,5 +113,7 @@ class ReapService(EventService):
             for job in jobs:
                 with (yield from self.run.lock):
                     yield from self.reap(job)
+                    yield from asyncio.sleep(2)  # Thrashing the disk is causing
+                    #                        massive issues in prod; this sucks.
             # yield from self.logger.log("reap", "Sleep")
             yield from asyncio.sleep(5)

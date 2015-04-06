@@ -168,3 +168,5 @@ class RunService(EventService):
             yield from self._start(job)
             yield from self.alert.running(job.name)
             yield from self.log('started', job=job.name, why=why)
+            yield from asyncio.sleep(5)  # Thrashing the disk is causing
+            #                              massive issues in prod; this sucks.
