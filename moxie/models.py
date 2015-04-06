@@ -35,6 +35,7 @@ class Job(Base):
     name = Column(String(255), unique=True)
     description = Column(String(255))
     command = Column(String(255))
+    entrypoint = Column(String(255), default=None, nullable=True)
     image = Column(String(255))
     scheduled = Column(DateTime)
     interval = Column(Interval)

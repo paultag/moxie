@@ -104,6 +104,7 @@ class RunService(EventService):
             raise ValueError("Error: Told to create container that exists.")
 
         cmd = shlex.split(job.command)
+        entrypoint = job.entrypoint
 
         jobenvs = yield from self.database.env.get(job.env_id)
         volumes = yield from self.database.volume.get(job.volumes_id)
@@ -123,6 +124,7 @@ class RunService(EventService):
         try:
             container = yield from self.containers.create(
                 {"Cmd": cmd,
+                 "Entrypoint": entrypoint,
                  "Image": job.image,
                  "Env": env,
                  "AttachStdin": True,
