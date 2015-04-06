@@ -26,7 +26,7 @@ class SlackAlert:
     strings = {
         # "starting": "{job.name} is starting.",
         # "running": "{job.name} is running.",
-        "success": "{job.name} has completed successfully.",
+        # "success": "{job.name} has completed successfully.",
         "error": "{job.name} had an error.",
         "failure": "{job.name} failed.",
     }
