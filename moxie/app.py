@@ -52,7 +52,7 @@ def get_jobs(conn, jobs, limit=10):
     ret = []
     for job in jobs:
         ret.append((job, (yield from get_logs(conn, job, limit=limit))))
-    return ret
+    return sorted(ret,key=lambda tup: tup[0].name)
 
 
 
