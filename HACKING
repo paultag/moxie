@@ -1,0 +1,20 @@
+Quick setup
+===========
+
+Enter your virtualenv:
+
+$ pip install -r requirements.txt
+$ mkdir keys
+$ cd keys
+$ ssh-keygen -f key
+$ cd ..
+$ ln -s keys/key ssh_host_keys
+$ touch authorized_keys
+$ sudo su postgres -c psql
+postgres=# CREATE ROLE moxie WITH LOGIN PASSWORD 'moxie';
+CREATE ROLE
+postgres=# CREATE DATABASE moxie OWNER moxie;
+CREATE DATABASE
+$ moxie-init
+$ moxie-load eg/manual.yaml
+$ moxied
