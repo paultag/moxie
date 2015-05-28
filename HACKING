@@ -3,6 +3,8 @@ Quick setup
 
 Enter your virtualenv:
 
+$ sudo apt-get install coffeescript node-uglify node-less
+$ make
 $ pip install -r requirements.txt
 $ mkdir keys
 $ cd keys
