@@ -93,7 +93,7 @@ class MoxieApp(object):
         else:
             try:
                 type_, encoding = self._mimetypes.guess_type(path)
-                response = request.make_response(200, ('Content-Type', type_))
+                response = request.make_response(200, content_type=type_)
 
                 with open(rpath, 'rb') as fd:
                     chunk = fd.read(2048)
