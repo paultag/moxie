@@ -37,23 +37,20 @@ docker = Docker()
 
 
 @asyncio.coroutine
-def get_logs(conn, job, limit=10):
-    runs = yield from conn.execute(select(
-        [Run.__table__]).where(
-            Run.job_id == job.id
-        ).order_by(
-            desc(Run.start_time)
-        ).limit(limit))
-    return runs
+def table_to_tuple(jobs_runs, limit=10):
+    job_keys = [key for key in Job.__dict__.keys() if not key.startswith("__")]
 
+    jobs = {}
+    for job_run in jobs_runs:
+        job = {}
+        for key in job_keys:
+            job[key] = getattr(job_run, "job_" + key, None)
 
-@asyncio.coroutine
-def get_jobs(conn, jobs, limit=10):
-    ret = []
-    for job in jobs:
-        ret.append((job, (yield from get_logs(conn, job, limit=limit))))
-    return sorted(ret, key=lambda tup: tup[0].name)
+        if not jobs.get(job_run.job_id):
+            jobs[job_run.job_id] = [job, []]
+        jobs[job_run.job_id][1].append(job_run)
 
+    return [(job, runs[:limit]) for (job, runs) in jobs.values()]
 
 
 @app.websocket("^websocket/stream/(?P<name>.*)/$")
@@ -77,13 +74,23 @@ def overview(request):
 def jobs(request):
     engine = yield from aiopg.sa.create_engine(DATABASE_URL)
     with (yield from engine) as conn:
-        res = yield from conn.execute(Job.__table__.select())
+
+        res = yield from conn.execute(select(
+            [Job.__table__, Run.__table__],
+            use_labels=True
+        ).select_from(join(
+            Job.__table__,
+            Run.__table__,
+            Job.id == Run.job_id
+        )).order_by(Run.id.desc()))
+
         return request.render('jobs.html', {
-            "jobs": (yield from get_jobs(conn, res)),
+            "jobs": (yield from table_to_tuple(res)),
         })
 
+
 @app.register("^run/(?P<key>.*)/$")
-def maintainers(request, key):
+def run(request, key):
     engine = yield from aiopg.sa.create_engine(DATABASE_URL)
     with (yield from engine) as conn:
         runs = yield from conn.execute(select(
@@ -106,7 +113,7 @@ def maintainers(request):
 
 
 @app.register("^maintainer/(?P<id>.*)/$")
-def maintainers(request, id):
+def maintainer(request, id):
     engine = yield from aiopg.sa.create_engine(DATABASE_URL)
     with (yield from engine) as conn:
         maintainers = yield from conn.execute(select(
@@ -114,13 +121,18 @@ def maintainers(request, id):
         )
         maintainer = yield from maintainers.first()
 
-        jobs = yield from conn.execute(select([Job.__table__]).where(
-            Job.maintainer_id == id
-        ))
+        jobs = yield from conn.execute(select(
+            [Job.__table__, Run.__table__],
+            use_labels=True
+        ).select_from(join(
+            Job.__table__,
+            Run.__table__,
+            Job.id == Run.job_id
+        )).where(Job.maintainer_id == id).order_by(Run.id.desc()))
 
         return request.render('maintainer.html', {
             "maintainer": maintainer,
-            "jobs": (yield from get_jobs(conn, jobs)),
+            "jobs": (yield from table_to_tuple(jobs)),
         })
 
 
@@ -128,13 +140,18 @@ def maintainers(request, id):
 def tag(request, id):
     engine = yield from aiopg.sa.create_engine(DATABASE_URL)
     with (yield from engine) as conn:
-        jobs = yield from conn.execute(select([Job.__table__]).where(
-            Job.tags.contains([id])
-        ))
+        jobs = yield from conn.execute(select(
+            [Job.__table__, Run.__table__],
+            use_labels=True
+        ).select_from(join(
+            Job.__table__,
+            Run.__table__,
+            Job.id == Run.job_id
+        )).where(Job.tags.contains([id])).order_by(Run.id.desc()))
 
         return request.render('tag.html', {
             "tag": id,
-            "jobs": (yield from get_jobs(conn, jobs)),
+            "jobs": (yield from table_to_tuple(jobs)),
         })
 
 
@@ -197,7 +214,7 @@ def container(request, name):
 
 
 @app.register("^cast/$")
-def container(request):
+def cast(request):
     engine = yield from aiopg.sa.create_engine(DATABASE_URL)
     with (yield from engine) as conn:
         runs = yield from conn.execute(select(
