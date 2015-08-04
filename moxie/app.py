@@ -76,7 +76,7 @@ def get_job_runs(where_clause=Job.id.isnot(None), limit=10):
         jobs[job_run.job_id][1].append(job_run)
 
     # Only pass the most recent _limit_ Runs to the view
-    return [(job, runs[:limit]) for (job, runs) in jobs.values()]
+    return [(job, runs[:limit]) for (job, runs) in sorted(jobs.values(), key=lambda k: k[0]['name'])]
 
 
 @app.websocket("^websocket/stream/(?P<name>.*)/$")
