@@ -143,7 +143,7 @@ class RunService(EventService):
         return container
 
     @asyncio.coroutine
-    def run(self, job, why):
+    def run(self, job, why, cmd=None):
         self.containers = EventService.resolve(
             "moxie.cores.container.ContainerService")
         self.database = EventService.resolve(
