@@ -2,7 +2,7 @@
 FROM        debian:unstable
 MAINTAINER  Paul R. Tagliamonte <paultag@debian.org>
 
-RUN echo "deb-src http://http.debian.net/debian/ unstable main" >> /etc/apt/sources.list
+RUN echo "deb-src http://http.debian.net/debian/ unstable main" > /etc/apt/sources.list.d/moxie.list
 RUN apt-get update && apt-get install -y \
     python3.4 \
     python3-pip \
