@@ -1,8 +1,10 @@
 # VERSION   0.1
-FROM        debian:unstable
+FROM        debian:jessie
 MAINTAINER  Paul R. Tagliamonte <paultag@debian.org>
 
-RUN echo "deb-src http://http.debian.net/debian/ unstable main" > /etc/apt/sources.list.d/moxie.list
+ENV DEBIAN_FRONTEND noninteractive
+
+RUN echo "deb-src http://http.debian.net/debian/ jessie main" > /etc/apt/sources.list.d/moxie.list
 RUN apt-get update && apt-get install -y \
     python3.4 \
     python3-pip \
@@ -10,10 +12,7 @@ RUN apt-get update && apt-get install -y \
     node-uglify \
     node-less \
     coffeescript \
-    locales locales-all
-
-RUN locale-gen en_US.UTF-8
-RUN dpkg-reconfigure locales -phigh
+    locales-all
 
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
