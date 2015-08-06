@@ -25,7 +25,8 @@ from aiodocker.docker import Docker
 
 import json
 import humanize.time
-from sqlalchemy import select, join, desc
+import re
+from sqlalchemy import select, join, desc, text
 from moxie.server import MoxieApp
 from moxie.models import Job, Maintainer, Run
 from moxie.core import DATABASE_URL
@@ -37,7 +38,7 @@ docker = Docker()
 
 
 @asyncio.coroutine
-def get_job_runs(where_clause=Job.id.isnot(None), limit=10):
+def get_job_runs(where_clause=text('TRUE'), limit=10):
     '''
     Return Jobs and their most recent Runs. The default is to return
     all Jobs, but this can be subset by passing a SQLAlchemy-compatible
@@ -53,30 +54,56 @@ def get_job_runs(where_clause=Job.id.isnot(None), limit=10):
 
     # Get a table where each row is a Job and one of its Runs
     engine = yield from aiopg.sa.create_engine(DATABASE_URL)
-    with (yield from engine) as conn:
-        jobs_runs = yield from conn.execute(select(
-            [Job.__table__, Run.__table__],
-            use_labels=True
-        ).select_from(join(
-            Job.__table__,
-            Run.__table__,
-            Job.id == Run.job_id
-        )).where(where_clause).order_by(Run.id.desc()))
+    jobs_runs_query = text('''
+        SELECT Job.id AS job_id,
+            Job.name AS job_name,
+            Job.description AS job_description,
+            Job.active AS job_active,
+            Job.tags AS job_tags,
+            Run.id AS run_id,
+            Run.failed AS run_failed,
+            Run.log AS run_log,
+            Run.start_time AS run_start_time,
+            Run.end_time AS run_end_time
+        FROM Job
+        LEFT JOIN (
+            SELECT *
+            FROM (
+                SELECT *,
+                    RANK() OVER (PARTITION BY job_id ORDER BY id DESC) AS recency
+                FROM Run
+            ) AS Run
+            WHERE recency <= {limit}
+        ) AS Run
+        ON Job.id = Run.job_id
+        WHERE {where_clause}
+        ORDER BY Run.id DESC
+        ;'''.format(limit=limit, where_clause=where_clause))
 
-    job_keys = [key for key in Job.__dict__.keys() if not key.startswith("__")]
+    with (yield from engine) as conn:
+        jobs_runs = yield from conn.execute(jobs_runs_query)
+
     jobs = {}
     for job_run in jobs_runs:
-        # Create a phony Job-ish object for use in the view template
+        # Create phony objects for use in the view template
         job = {}
-        for key in job_keys:
-            job[key] = getattr(job_run, "job_" + key, None)
+        run = {}
+        for key in job_run.keys():
+            key_name = re.sub(r'^(?:job|run)_', '', key)
+            if key.startswith('job_'):
+                job[key_name] = getattr(job_run, key, None)
+            elif key.startswith('run_'):
+                run[key_name] = getattr(job_run, key, None)
 
         if not jobs.get(job_run.job_id):
             jobs[job_run.job_id] = [job, []]
-        jobs[job_run.job_id][1].append(job_run)
+
+        # If a Job exists with no Runs, leave its Runs list empty
+        if run.get('id'):
+            jobs[job_run.job_id][1].append(run)
 
     # Only pass the most recent _limit_ Runs to the view
-    return [(job, runs[:limit]) for (job, runs) in sorted(jobs.values(), key=lambda k: k[0]['name'])]
+    return [(job, runs) for (job, runs) in sorted(jobs.values(), key=lambda k: k[0]['name'])]
 
 
 @app.websocket("^websocket/stream/(?P<name>.*)/$")
@@ -137,7 +164,7 @@ def maintainer(request, id):
 
     return request.render('maintainer.html', {
         "maintainer": maintainer,
-        "jobs": (yield from get_job_runs(Job.maintainer_id.__eq__(int(id)))),
+        "jobs": (yield from get_job_runs(text('Job.maintainer_id = {}'.format(id)))),
     })
 
 
@@ -145,7 +172,7 @@ def maintainer(request, id):
 def tag(request, id):
     return request.render('tag.html', {
         "tag": id,
-        "jobs": (yield from get_job_runs(Job.tags.contains([id]))),
+        "jobs": (yield from get_job_runs(text("Job.tags @> ARRAY['{}']".format(id)))),
     })
 
 
