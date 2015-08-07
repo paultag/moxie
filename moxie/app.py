@@ -38,7 +38,7 @@ docker = Docker()
 
 
 @asyncio.coroutine
-def get_job_runs(where_clause=text('TRUE'), limit=10):
+def get_job_runs(limit=10):
     '''
     Return Jobs and their most recent Runs. The default is to return
     all Jobs, but this can be subset by passing a SQLAlchemy-compatible
@@ -54,12 +54,14 @@ def get_job_runs(where_clause=text('TRUE'), limit=10):
 
     # Get a table where each row is a Job and one of its Runs
     engine = yield from aiopg.sa.create_engine(DATABASE_URL)
+    assert isinstance(limit, int), "Limit must be an integer"
     jobs_runs_query = text('''
         SELECT Job.id AS job_id,
             Job.name AS job_name,
             Job.description AS job_description,
             Job.active AS job_active,
             Job.tags AS job_tags,
+            Job.maintainer_id AS job_maintainer_id,
             Run.id AS run_id,
             Run.failed AS run_failed,
             Run.start_time AS run_start_time,
@@ -75,9 +77,8 @@ def get_job_runs(where_clause=text('TRUE'), limit=10):
             WHERE recency <= {limit}
         ) AS Run
         ON Job.id = Run.job_id
-        WHERE {where_clause}
         ORDER BY Run.id DESC
-        ;'''.format(limit=limit, where_clause=where_clause))
+        ;'''.format(limit=limit))
 
     with (yield from engine) as conn:
         jobs_runs = yield from conn.execute(jobs_runs_query)
@@ -161,17 +162,27 @@ def maintainer(request, id):
         )
         maintainer = yield from maintainers.first()
 
+    @asyncio.coroutine
+    def jobs():
+        job_runs = yield from get_job_runs()
+        return ([job, runs] for job, runs in job_runs if job['maintainer_id'] == int(id))
+
     return request.render('maintainer.html', {
         "maintainer": maintainer,
-        "jobs": (yield from get_job_runs(text('Job.maintainer_id = {}'.format(id)))),
+        "jobs": (yield from jobs()),
     })
 
 
 @app.register("^tag/(?P<id>.*)/$")
 def tag(request, id):
+    @asyncio.coroutine
+    def jobs():
+        job_runs = yield from get_job_runs()
+        return ([job, runs] for job, runs in job_runs if id in job['tags'])
+
     return request.render('tag.html', {
         "tag": id,
-        "jobs": (yield from get_job_runs(text("Job.tags @> ARRAY['{}']".format(id)))),
+        "jobs": (yield from jobs()),
     })
 
 
