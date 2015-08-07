@@ -62,7 +62,6 @@ def get_job_runs(where_clause=text('TRUE'), limit=10):
             Job.tags AS job_tags,
             Run.id AS run_id,
             Run.failed AS run_failed,
-            Run.log AS run_log,
             Run.start_time AS run_start_time,
             Run.end_time AS run_end_time
         FROM Job
@@ -191,9 +190,11 @@ def job(request, name):
         )).where(Job.name == name).limit(1))
         job = yield from jobs.first()
 
-        runs = yield from conn.execute(select([Run.__table__]).where(
-            Run.job_id == job.job_id
-        ).order_by(Run.id.desc()))
+        runs = yield from conn.execute(
+            select([Run.id, Run.failed, Run.start_time, Run.end_time]).
+            where(Run.job_id == job.job_id).
+            order_by(Run.id.desc())
+        )
 
         return request.render('job.html', {
             "job": job,
