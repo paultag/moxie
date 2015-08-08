@@ -4,7 +4,9 @@ MAINTAINER  Paul R. Tagliamonte <paultag@debian.org>
 
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN echo "deb-src http://http.debian.net/debian/ jessie main" > /etc/apt/sources.list.d/moxie.list
+# add deb-src entries
+RUN find /etc/apt/sources.list* -type f -exec sed -i 'p; s/^deb /deb-src /' '{}' +
+
 RUN apt-get update && apt-get install -y \
     python3.4 \
     python3-pip \
