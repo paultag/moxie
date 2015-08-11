@@ -13,7 +13,12 @@ This build was a massive
 {% endif %}.
 <br />
 <br />
+Build start time: {{run.start_time.strftime('%Y-%m-%d %-H:%M ')}} GMT
+<br />
+Build end time: {{run.end_time.strftime('%Y-%m-%d %-H:%M ')}} GMT
 
+<br />
+<br />
 <pre>
 {{run.log}}
 </pre>
