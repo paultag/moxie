@@ -21,9 +21,8 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import (Table, Column, ForeignKey, UniqueConstraint,
-                        Integer, String, DateTime, Boolean, MetaData,
-                        Interval, DateTime, Text)
+from sqlalchemy import (Column, MetaData, ForeignKey,
+                        Integer, String, Text, DateTime, Boolean)
 
 metadata = MetaData()
 Base = declarative_base(metadata=metadata)
@@ -37,8 +36,9 @@ class Job(Base):
     command = Column(String(255))
     entrypoint = Column(String(255), default=None, nullable=True)
     image = Column(String(255))
+    crontab = Column(Text, default=None, nullable=True)
+    timezone = Column(Text, default=None, nullable=True)
     scheduled = Column(DateTime)
-    interval = Column(Interval)
     active = Column(Boolean)
     manual = Column(Boolean)
     tags = Column(postgresql.ARRAY(Text))

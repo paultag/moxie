@@ -121,6 +121,8 @@ def load():
     import sys
     import yaml
     import datetime as dt
+    import pytz
+    from croniter import croniter
     from sqlalchemy import create_engine
     from sqlalchemy.orm import sessionmaker
     from moxie.models import (Base, Job, Maintainer, User,
@@ -246,8 +248,17 @@ def load():
             job['manual'] = manual
 
             if not manual:
-                interval = job.pop('interval')
-                job['interval'] = dt.timedelta(seconds=interval)
+                # Validate Cron syntax and confirm timezone exists
+                assert (job['crontab'] and job['timezone']), \
+                    "For non-manual Jobs, `crontab` and `timezone` must both be specified"
+                try:
+                    pytz.timezone(job['timezone'])
+                except pytz.exceptions.UnknownTimeZoneError:
+                    raise ValueError("Error: {} is not a timezone".format(job['timezone']))
+                try:
+                    croniter(job['crontab'], dt.datetime.utcnow())
+                except (ValueError, KeyError):
+                    raise ValueError("Error: {} is not valid Cron syntax".format(job['crontab']))
 
             job['maintainer_id'] = get_one(
                 Maintainer,

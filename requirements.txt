@@ -11,6 +11,8 @@ pyyaml
 websockets
 alembic
 python-dateutil
+pytz
+croniter
 -e git://github.com/jmoiron/humanize#egg=humanize
 
 slacker
