@@ -24,9 +24,9 @@
           <td class='runs'>
               {% for run in runs %}
                   {% if run.failed %}
-              <span class='failed'>✘</span>
+              <span><a class='failed' href="/run/{{run.id}}/">✘</a></span>
                   {% else %}
-              <span class='success'>✓</span>
+              <span><a class='success' href="/run/{{run.id}}/">✓</a></span>
                   {% endif %}
               {% endfor %}
           </td>
