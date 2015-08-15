@@ -193,7 +193,7 @@ class DatabaseService(Service):
             else:
                 local_offset = pytz.timezone(state.timezone).utcoffset(dt.datetime.utcnow())
                 cron = croniter(state.crontab, dt.datetime.utcnow() + local_offset)
-                reschedule = cron.get_next() - local_offset
+                reschedule = cron.get_next(dt.datetime) - local_offset
 
             with (yield from self.db.engine) as conn:
                 yield from conn.execute(update(
