@@ -6,7 +6,7 @@
           <th>Description</th>
           <th>Tags</th>
           <th>Runs</th>
-          <th>Last Run Started (GMT)</th>
+          <th>Last Run Started</th>
         </tr>
       </thead>
       <tbody>
@@ -32,7 +32,7 @@
           </td>
           <td>
           {% if runs|length > 0 %}
-            {{runs[0]["start_time"].strftime('%Y-%m-%d %-H:%M ')}} GMT
+            {{runs[0]["start_time"].strftime('%Y-%m-%d %-H:%M ')}} UTC
           {% else %}
             N/A
           {% endif %}
