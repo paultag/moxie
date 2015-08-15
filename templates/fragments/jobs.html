@@ -6,6 +6,7 @@
           <th>Description</th>
           <th>Tags</th>
           <th>Runs</th>
+          <th>Last Run Started (GMT)</th>
         </tr>
       </thead>
       <tbody>
@@ -28,6 +29,13 @@
               <span class='success'>✓</span>
                   {% endif %}
               {% endfor %}
+          </td>
+          <td>
+          {% if runs|length > 0 %}
+            {{runs[0]["start_time"].strftime('%Y-%m-%d %-H:%M ')}} GMT
+          {% else %}
+            N/A
+          {% endif %}
           </td>
         </tr>
 {% endfor %}
