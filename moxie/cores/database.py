@@ -21,6 +21,8 @@
 import asyncio
 import aiopg.sa
 import datetime as dt
+import pytz
+from croniter import croniter
 from aiocore import Service
 from sqlalchemy import update, insert, select, and_
 
@@ -188,9 +190,12 @@ class DatabaseService(Service):
             state = yield from self.get(name)
             if state.manual:
                 raise ValueError("Can't reschedule")
+            else:
+                local_offset = pytz.timezone(state.timezone).utcoffset(dt.datetime.utcnow())
+                cron = croniter(state.crontab, dt.datetime.utcnow() + local_offset)
+                reschedule = cron.get_next(dt.datetime) - local_offset
 
             with (yield from self.db.engine) as conn:
-                reschedule = (dt.datetime.utcnow() + state.interval)
                 yield from conn.execute(update(
                     Job.__table__
                 ).where(
