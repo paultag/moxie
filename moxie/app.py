@@ -210,7 +210,6 @@ def job(request, name):
         return request.render('job.html', {
             "job": job,
             "runs": runs,
-            "interval": humanize.time.naturaldelta(job.job_interval),
             "next_run": humanize.naturaltime(job.job_scheduled),
         })
 

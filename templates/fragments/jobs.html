@@ -6,7 +6,7 @@
           <th>Description</th>
           <th>Tags</th>
           <th>Runs</th>
-          <th>Last Run Started (GMT)</th>
+          <th>Last Run Started</th>
         </tr>
       </thead>
       <tbody>
@@ -24,15 +24,15 @@
           <td class='runs'>
               {% for run in runs %}
                   {% if run.failed %}
-              <span class='failed'>✘</span>
+              <span><a class='failed' href="/run/{{run.id}}/">✘</a></span>
                   {% else %}
-              <span class='success'>✓</span>
+              <span><a class='success' href="/run/{{run.id}}/">✓</a></span>
                   {% endif %}
               {% endfor %}
           </td>
           <td>
           {% if runs|length > 0 %}
-            {{runs[0]["start_time"].strftime('%Y-%m-%d %-H:%M ')}} GMT
+            {{runs[0]["start_time"].strftime('%Y-%m-%d %-H:%M ')}} UTC
           {% else %}
             N/A
           {% endif %}
