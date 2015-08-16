@@ -14,14 +14,17 @@ RUN apt-get update && apt-get install -y \
     node-uglify \
     node-less \
     coffeescript \
-    locales-all
+    locales-all \
+    libssl-dev \
+    libffi-dev \
+    python-dev
 
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 ENV PYTHONIOENCODING utf-8
 
-RUN apt-get update && apt-get build-dep -y python3-psycopg2 python3-cryptography
+RUN apt-get update && apt-get build-dep -y python3-psycopg2
 
 RUN mkdir -p /opt/pault.ag/
 ADD . /opt/pault.ag/moxie/
