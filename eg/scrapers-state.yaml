@@ -7,7 +7,8 @@ jobs:
     - name: "scrapers-state-il"
       description: "IL Scrape"
       maintainer: "paultag@example.com"
-      interval: 30
+      crontab: "0 4 * * *"
+      timezone: "America/New_York"
       command: "update il --scrape"
       image: "sunlightlabs/scrapers-us-state"
       env: "ocd"
